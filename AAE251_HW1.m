@@ -12,7 +12,7 @@
 %   Academic Integrity:
 %     [X] I worked with one or more peers but our collaboration
 %        maintained academic integrity.
-%     Peers I worked with: Name, login@purdue [repeat for each]
+%     Peers I worked with: Preston Wright, wrigh735@purdue.edu
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -82,7 +82,8 @@ m4 = 4e-3;
 % pressure
 
 % input into for loop to find all values:
-for i = 1:length(height)
+for i = 0:length(height)-1
+    i = i + 1;
     if height(i) < 0
         fprintf('Function Error! Exceeded Lower Bounds!\n');
     elseif height(i) > A0 & height(i) < A1 
@@ -100,7 +101,7 @@ for i = 1:length(height)
     elseif height(i) > A6 & height(i) < A7
         T(i) = T6 + m4 * (height(i) - A6);
     end
-i = i + 1;
+
 end
 
 % Set initial and final values:
