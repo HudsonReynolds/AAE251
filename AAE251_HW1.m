@@ -2,18 +2,12 @@
 % AAE 251 
 % Program Description 
 % This program calculates temperature, pressure, density, and speed of
-% sound for a given input height. Data from Anderson Introduction to Flight
-% 8th Editon.
+% sound for a given input height on the alien planet
 %
 % Assignment Information
-%   Assignment:     HW1, Section B
+%   Assignment:     ISA 1
 %   Author:         Hudson Reynolds, reyno250@purdue.edu
 %   Team ID:        R406
-%   Academic Integrity:
-%     [X] I worked with one or more peers but our collaboration
-%        maintained academic integrity.
-%     Peers I worked with: Preston Wright, wrigh735@purdue.edu
-%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Init:
