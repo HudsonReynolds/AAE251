@@ -71,10 +71,10 @@ grid on;
 
 % print statements:
 
-fprintf("\nThe Range of ΔV Earth Help from Kourou is %.2f km/s.\n", dVRangeKourou);
-fprintf("The Range of ΔV Earth Help from KSC is %.2f km/s.\n", dVRangeKSC);
+fprintf("\nThe Range of ΔV Earth Help from Kourou is %.3f m/s.\n", dVRangeKourou * 1000);
+fprintf("The Range of ΔV Earth Help from KSC is %.3f m/s.\n", dVRangeKSC * 1000);
 
-fprintf("\nThe Maximum ΔV Earth Help of %.2f km/s occurs at Kourou at 90 degrees launch azimuth.\n", dVMax);
+fprintf("\nThe Maximum ΔV Earth Help of %.3f m/s occurs at Kourou at 90 degrees launch azimuth.\n", dVMax * 1000);
 
 % sin(Az) = cos(i) / cos(La)
 % i >= La
