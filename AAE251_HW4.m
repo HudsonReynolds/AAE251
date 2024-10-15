@@ -48,27 +48,6 @@ dVRangeKSC = OmegaEarth * radEarth * cosd(latKSC) * sind(90) ...
 
 dVMax = OmegaEarth * radEarth * cosd(latKourou) * sind(90);
 
-% plot figure:
-
-figure(1)
-subplot(2,1,1)
-plot(AzList, dVEarthHelpKSC, 'Color', "red", "LineWidth", 1)
-xlabel('Launch Azimuth Angle (deg)')
-xline(azimuthsKSC(1), '--', 'Minimum Launch Azimuth', 'LabelVerticalAlignment','bottom')
-xline(azimuthsKSC(2), '--', 'Maximum Launch Azimuth', 'LabelVerticalAlignment','bottom')
-ylabel('Delta-V (km/s)')
-title('Delta-V Imparted by Earth at KSC by Launch Azimuth')
-grid on
-
-subplot(2,1,2)
-plot(AzList, dVEarthHelpKourou, "Color", "blue", "LineWidth", 1)
-xlabel('Launch Azimuth Angle [deg]')
-xline(azimuthsKourou(1), '--', 'Minimum Launch Azimuth', 'LabelVerticalAlignment','top')
-xline(azimuthsKourou(2), '--', 'Maximum Launch Azimuth', 'LabelVerticalAlignment','bottom')
-ylabel('ΔV Imparted by Earth [km/s]')
-title('ΔV Imparted by Earth at Kourou by Launch Azimuth')
-grid on;
-
 % print statements:
 
 fprintf("\nThe Range of ΔV Earth Help from Kourou is %.3f m/s.\n", dVRangeKourou * 1000);
@@ -89,8 +68,8 @@ InitAziKSC = [40,90,110];
 dVLEO = sqrt(muEarth / (radOrbit + radEarth));
 
 %calculate the total energy to get into orbit from certain azimuth:
-dVTotKSC = dVLEO + dVLoss - (OmegaEarth * radEarth * cosd(latKSC) * sind(InitAziKSC))
-dVTotKourou = dVLEO + dVLoss - (OmegaEarth * radEarth * cosd(latKourou) * sind(InitAziKourou))
+dVTotKSC = dVLEO + dVLoss - (OmegaEarth * radEarth * cosd(latKSC) * sind(InitAziKSC));
+dVTotKourou = dVLEO + dVLoss - (OmegaEarth * radEarth * cosd(latKourou) * sind(InitAziKourou));
 dVTotCombined = [dVTotKSC, dVTotKourou];
 
 % calculate the final inclination based on the launch location and azimuth:
@@ -104,7 +83,7 @@ n = 1;
 for index = 1:length(orbitalIncCombined)
     for finalAzimuth = 0:0.1:90
         nu = abs(orbitalIncCombined(index) - finalAzimuth);
-        dVIncChange = 2 * dVLEO * sind(nu);
+        dVIncChange = 2 * dVLEO * sind(nu/2);
         finalAzimuthList(n) = finalAzimuth;
         dVTot(index,n) = dVIncChange + dVTotCombined(index);
         n = n + 1;
@@ -112,6 +91,26 @@ for index = 1:length(orbitalIncCombined)
     n = 1;
 end
 
+% plot figure:
+
+figure(1)
+subplot(2,1,1)
+plot(AzList, dVEarthHelpKSC, 'Color', "red", "LineWidth", 1)
+xlabel('Launch Azimuth Angle [deg]')
+xline(azimuthsKSC(1), '--', 'Minimum Launch Azimuth', 'LabelVerticalAlignment','bottom')
+xline(azimuthsKSC(2), '--', 'Maximum Launch Azimuth', 'LabelVerticalAlignment','bottom')
+ylabel('Delta-V [km/s]')
+title('Delta-V Imparted by Earth at KSC by Launch Azimuth')
+grid on
+
+subplot(2,1,2)
+plot(AzList, dVEarthHelpKourou, "Color", "blue", "LineWidth", 1)
+xlabel('Launch Azimuth Angle [deg]')
+xline(azimuthsKourou(1), '--', 'Minimum Launch Azimuth', 'LabelVerticalAlignment','top')
+xline(azimuthsKourou(2), '--', 'Maximum Launch Azimuth', 'LabelVerticalAlignment','bottom')
+ylabel('ΔV Imparted by Earth [km/s]')
+title('ΔV Imparted by Earth at Kourou by Launch Azimuth')
+grid on;
 
 figure(2)
 plot(finalAzimuthList, dVTot, 'LineWidth', 1)
