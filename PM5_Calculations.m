@@ -3,6 +3,8 @@
 %PM5_Calculations
 %Authors: Hudson Reynolds
 
+%% PART 1:
+
 %% Initializations:
 % values for earth and orbit:
 OmegaEarth = 7.292e-5; % sidereal rate [rad s^-1]
@@ -21,3 +23,14 @@ dVEarthHelp = OmegaEarth * radEarth * cosd(latKSC) * sind(Az)
 dVLEO = sqrt(muEarth / (radOrbit + radEarth))
 
 dVTot = dVLEO + dVLoss - dVEarthHelp
+
+%% PART 2:
+
+% inits:
+
+aEarthOrbit = 1.5e8;  %radius of earth orbit [km]
+
+aVenusOrbit = 1.08e8; % radius of venus orbit [km]
+
+aTransferOrbit = (aEarthOrbit + aVenusOrbit) / 2;
+
