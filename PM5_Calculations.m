@@ -51,7 +51,7 @@ periodVenus = 2 * pi * sqrt(aVenusOrbit^3 / muSun);
 
 transferTime = pi * sqrt(aTransferOrbit^3 / muSun);
 
-transferTimeDays = transferTime * s2day;
+transferTimeDays = transferTime * s2day
 
 meanMotionEarth = 2 * pi / periodEarth;
 
@@ -65,7 +65,6 @@ synPeriodDays = synPeriod * s2day;
 
 phaseAngle = pi - meanMotionVenus * transferTime
 
-phaseAngleDegrees = rad2deg(phaseAngle);
-
+phaseAngleDegrees = rad2deg(phaseAngle)
 
 
