@@ -67,4 +67,25 @@ phaseAngle = pi - meanMotionVenus * transferTime
 
 phaseAngleDegrees = rad2deg(phaseAngle)
 
+%% PART 3
+
+%values for bodies and orbits
+rEarthOrbit = 1.496*10^8;
+rVenusOrbit = 1.496*10^8 * .723;
+muSun = 132712*10^6;
+muVenus = 0.32486*10^6;
+radOrbitVenus = 500;
+radVenus = 6051;
+
+sqrt1 = sqrt((2*muSun*rVenusOrbit)/(rEarthOrbit*(rEarthOrbit+rVenusOrbit)));
+
+Vdepart = sqrt(((sqrt1-sqrt(muSun/rEarthOrbit))^2)+(2*muEarth/(radEarth+radOrbit))) - sqrt(muEarth/(radEarth+radOrbit))
+
+
+% PART 4
+
+sqrt2 = sqrt((2*muSun*rEarthOrbit)/(rVenusOrbit*(rEarthOrbit+rVenusOrbit)));
+
+Varrive = sqrt(((sqrt2-sqrt(muSun/rVenusOrbit))^2)+(2*muVenus/(radVenus+radOrbitVenus))) - sqrt(muVenus/(radVenus+radOrbitVenus))
+
 
