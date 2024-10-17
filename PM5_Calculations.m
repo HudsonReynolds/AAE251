@@ -27,7 +27,7 @@ dVEarthHelp = OmegaEarth * radEarth * cosd(latKSC) * sind(Az)
 
 dVLEO = sqrt(muEarth / (radOrbit + radEarth))
 
-dVTot = dVLEO + dVLoss - dVEarthHelp
+dV1 = dVLEO + dVLoss - dVEarthHelp
 
 %% PART 2:
 
@@ -89,3 +89,6 @@ sqrt2 = sqrt((2*muSun*rEarthOrbit)/(rVenusOrbit*(rEarthOrbit+rVenusOrbit)));
 Varrive = sqrt(((sqrt2-sqrt(muSun/rVenusOrbit))^2)+(2*muVenus/(radVenus+radOrbitVenus))) - sqrt(muVenus/(radVenus+radOrbitVenus))
 
 
+% PART 5
+
+dVtot =  Vdepart + Varrive
