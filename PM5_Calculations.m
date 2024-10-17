@@ -26,11 +26,31 @@ dVTot = dVLEO + dVLoss - dVEarthHelp
 
 %% PART 2:
 
+%% Orbits start on March 23, 2025 in an inferior conjuction.    
+
 % inits:
 
-aEarthOrbit = 1.5e8;  %radius of earth orbit [km]
+muSun = 1.33e11;      % mu value of sun [km^3 s^-2]
+
+aEarthOrbit = 1.5e8;  % radius of earth orbit [km]
 
 aVenusOrbit = 1.08e8; % radius of venus orbit [km]
 
 aTransferOrbit = (aEarthOrbit + aVenusOrbit) / 2;
+
+periodEarth = 2 * pi * sqrt(aEarthOrbit^3 / muSun);
+
+periodEarthYrs = periodEarth / (60 * 60 * 24 * 365);
+
+periodVenus = 2 * pi * sqrt(aVenusOrbit^3 / muSun);
+
+transferTime = pi * sqrt(aTransferOrbit^3 / muSun);
+
+transferTimeDays = transferTime / (60 * 60 * 24);
+
+meanMotionEarth = 2 * pi / periodEarth;
+
+trueAnomolyEarth = meanMotionEarth * t;
+
+
 
