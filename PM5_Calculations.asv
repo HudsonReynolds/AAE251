@@ -7,9 +7,7 @@
 
 %% Initializations:
 
-% conversions:
 
-s2day = 1 / (60 * 60 * 24);
 
 % values for earth and orbit:
 OmegaEarth = 7.292e-5; % sidereal rate [rad s^-1]
@@ -45,27 +43,21 @@ aTransferOrbit = (aEarthOrbit + aVenusOrbit) / 2;
 
 periodEarth = 2 * pi * sqrt(aEarthOrbit^3 / muSun);
 
-periodEarthYrs = periodEarth * s2day / 365
+periodEarthYrs = periodEarth / (60 * 60 * 24 * 365);
 
 periodVenus = 2 * pi * sqrt(aVenusOrbit^3 / muSun);
 
 transferTime = pi * sqrt(aTransferOrbit^3 / muSun);
 
-transferTimeDays = transferTime * s2day;
+transferTimeDays = transferTime / (60 * 60 * 24);
 
 meanMotionEarth = 2 * pi / periodEarth;
-
-meanMotionVenus = 2 * pi / periodVenus;
 
 %trueAnomolyEarth = meanMotionEarth * t;
 
 synPeriod = periodVenus * periodEarth / abs(periodEarth - periodVenus)
 
-synPeriodDays = synPeriod * s2day;
-
-phaseAngle = pi - meanMotionVenus * transferTime
-
-phaseAngleDegrees = rad2deg(phaseAngle);
+synPeriodDays = synPeriod
 
 
 
