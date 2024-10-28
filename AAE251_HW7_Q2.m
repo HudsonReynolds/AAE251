@@ -38,6 +38,7 @@ alphaList = 0.1:0.01:0.8;
 
 for alpha1 = alphaList
 
+    % create an array index
     i = i + 1;
 
     % write the delta v of each stage in terms of the alpha variable
@@ -51,7 +52,7 @@ for alpha1 = alphaList
 
     % figure out the initial mass:
     mI(i) = mPay * MR2 * (1 - fInert) * MR1 * (1 - fInert) ...
-        / (1 - fInert * MR2) * (1 - fInert * MR1);
+        / ((1 - fInert * MR2) * (1 - fInert * MR1));
 
 end
 
