@@ -29,6 +29,7 @@ for k = 1:length(alphaList)
     % Find current value of alpha one and two
     alpha1 = alphaList(k);
     alpha2 = 1 - alpha1;
+    alpha2Array(k) = alpha2;
 
     % Calculate delta V and the mass fraction
     deltaV1 = alpha1 * deltaVTot;
@@ -37,7 +38,7 @@ for k = 1:length(alphaList)
     for j = 1:length(isp2List)
         mFracTwo(j) = exp(deltaV2/(isp2List(j)*g));
         % Calculate initial mass
-        mInit(k, j) = mPayload * ((mFracOne*(1-fInert))/(1-fInert*mFracOne)) * ((mFracTwo*(1-fInert))/(1-fInert*mFracTwo));
+        mInit(k, j) = mPayload * ((mFracOne*(1-fInert))/(1-fInert*mFracOne)) * ((mFracTwo(j)*(1-fInert))/(1-fInert*mFracTwo(j)));
     end
 
     % Update array index
@@ -48,6 +49,9 @@ figure(1)
 
 plot(alphaList, mInit)
 xlim([0.33 0.5])
+
+figure(2)
+plot(alpha2Array, mInit)
 
 legend("356 s", "372 s", "383 s", "399 s", "445 s")
 
