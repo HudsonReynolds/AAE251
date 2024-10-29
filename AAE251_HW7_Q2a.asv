@@ -55,12 +55,12 @@ hfig = figure;  % save the figure handle in a variable
 fname = 'HW7a';
 
 title("GLOW vs. Alpha One")
-plot(alphaOneArray, mInit, 'Linewidth', 1)
+plot(alphaOneArray, mInit)
 hold on
 plot(idealAlphaOne, idealMInit, Marker="x", MarkerSize=10)
 xlabel('$\alpha_1$')
-ylabel('GLOW')
-title('Gross Lift Off Weight v. $\alpha_1$')
+ylabel('$GLOW$')
+title('G')
 
 grid on
 
