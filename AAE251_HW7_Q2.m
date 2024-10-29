@@ -34,7 +34,7 @@ C2 = IspStage2 * g0; % exhaust velocity of stage 2 [m/s]
 
 i = 0;
 
-alphaList = 0.1:0.01:0.8;
+alphaList = 0.3:0.0001:0.6;
 
 for alpha1 = alphaList
 
@@ -51,8 +51,10 @@ for alpha1 = alphaList
 
 
     % figure out the initial mass:
-    mI(i) = mPay * MR2 * (1 - fInert) * MR1 * (1 - fInert) ...
-        / ((1 - fInert * MR2) * (1 - fInert * MR1));
+
+    mI(i) = mPay * ((MR1 * (1-fInert)) / (1-fInert*MR1)) * ((MR2*(1-fInert)) / (1-fInert*MR2));
+
+    % mI(i) = mPay * (MR2 * (1 - fInert) * MR1 * (1 - fInert)) / ((1 - fInert * MR2) * (1 - fInert * MR1));
 
 end
 
