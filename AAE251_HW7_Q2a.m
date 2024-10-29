@@ -92,9 +92,10 @@ print(hfig,fname,'-dpng', '-r300')
 %% Outputs
 
 % Output necessary information
+fprintf("The minimum GLOW value is: %.4f kg\n", idealMInit)
 fprintf("The alpha one value that leads to a minimum GLOW value is: %.4f\n", idealAlphaOne)
 fprintf("The corresponding alpha two value is: %.4f\n", idealAlphaTwo)
-fprintf("The corresponding propellant mass is: %.4f\n", idealMProp)
+fprintf("The corresponding propellant mass is: %.4f kg\n", idealMProp)
 
 
 
