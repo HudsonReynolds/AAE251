@@ -65,10 +65,13 @@ fname = 'HW7a';
 title("GLOW vs. Alpha One")
 plot(alphaOneArray, mInit, 'Linewidth', 1)
 hold on
-plot(idealAlphaOne, idealMInit, Marker="x", MarkerSize=10)
+plot(idealAlphaOne, idealMInit, Marker="x", MarkerSize=15)
 xlabel('$\alpha_1$')
-ylabel('GLOW')
+ylabel('GLOW [kg]')
+xlim([0.3 0.55])
 title('Gross Lift Off Weight v. $\alpha_1$')
+
+legend("GLOW", "Minimum GLOW")
 
 grid on
 

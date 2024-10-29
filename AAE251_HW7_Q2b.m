@@ -6,7 +6,7 @@
 %% Initializations 
 
 isp2List = [356, 372, 383, 399, 445]; % list of possible isps [s]
-alphaList = 0.30:0.01:0.5;           % list of alpha values
+alphaList = 0.30:0.001:0.5;           % list of alpha values
 fInert = 1/12;                        % Inert mass fraction
 g = 9.81;                             % Gravity
 isp1 = 295;                           % Specific impulse of stage one
@@ -45,13 +45,37 @@ for k = 1:length(alphaList)
     %i = i + 1;
 end
 
-figure(1)
+hfig = figure;  % save the figure handle in a variable
 
-plot(alphaList, mInit)
-xlim([0.33 0.5])
+fname = 'HW7b';
 
-figure(2)
+
 plot(alpha2Array, mInit)
+title("GLOW vs. $\alpha_2$")
 
-legend("356 s", "372 s", "383 s", "399 s", "445 s")
+xlabel('$\alpha_2$')
+ylabel('GLOW [kg]')
+
+xlim([0.5 0.67])
+
+legend("356 s", "372 s", "383 s", "399 s", "445 s", 'location', 'northwest')
+
+picturewidth = 20; % set this parameter and keep it forever
+hw_ratio = 0.7; % feel free to play with this ratio
+set(findall(hfig,'-property','FontSize'),'FontSize',17) % adjust fontsize to your document
+set(findall(hfig,'-property','Box'),'Box','off') % optional
+set(findall(hfig,'-property','Interpreter'),'Interpreter','latex') 
+set(findall(hfig,'-property','TickLabelInterpreter'),'TickLabelInterpreter','latex')
+set(hfig,'Units','centimeters','Position',[3 3 picturewidth hw_ratio*picturewidth])
+pos = get(hfig,'Position');
+set(hfig,'PaperPositionMode','Auto','PaperUnits','centimeters','PaperSize',[pos(3), pos(4)])
+%print(hfig,fname,'-dpdf','-painters','-fillpage')
+print(hfig,fname,'-dpng', '-r300')
+
+%% Outputs
+
+% Output necessary information
+fprintf("The alpha one value that leads to a minimum GLOW value is: %.4f\n", idealAlphaOne)
+fprintf("The corresponding alpha two value is: %.4f\n", idealAlphaTwo)
+fprintf("The corresponding propellant mass is: %.4f\n", idealMProp)
 
