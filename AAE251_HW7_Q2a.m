@@ -15,6 +15,14 @@ i = 1;                      % Iteration counter
 
 %% Calculations
 
+% The initial Gross Lift Off Weight (GLOW) is a function of the delta-v
+% proportion for stage 1 and stage 2, alpha 1 and alpha 2, respectively.
+% These proportions add to one. To find the ideal value, the value of alpha
+% 1 is iterated over in the span from 0.1 to 0.8.
+
+% Initial mass is determined from a variation of the Tsiolkovsky Rocket
+% equation for two stages
+
 % Iterate from .3 to .6 for alpha one
 for k = .3*tests:tests-.4*tests
 

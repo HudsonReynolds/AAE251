@@ -6,7 +6,7 @@
 %% Initializations 
 
 isp2List = [356, 372, 383, 399, 445]; % list of possible isps [s]
-alphaList = 0.30:0.001:0.5;           % list of alpha values
+alphaList = 0.5:0.005:0.67;           % list of alpha values
 fInert = 1/12;                        % Inert mass fraction
 g = 9.81;                             % Gravity
 isp1 = 295;                           % Specific impulse of stage one
@@ -24,31 +24,24 @@ i = 1;                                % Iteration counter
 % Initial mass is determined from a variation of the Tsiolkovsky Rocket
 % equation for two stages
 
-for k = alphaList
+for k = .3*tests:tests-.4*tests
 
     % Find current value of alpha one and two
-    alpha1 = alphaList(i);
-    alphaOneArray(i) = alphaList(i);
-    alpha2 = 1 - alpha1;
+    alphaOne = k/tests;
+    alphaOneArray(i) = alphaOne;
+    alphaTwo = 1 - alphaOne;
 
     % Calculate delta V and the mass fraction
-    deltaV1 = alpha1 * deltaVTot;
-    deltaV2 = alpha2 * deltaVTot;
-    mFracOne = exp(deltaV1/(isp1*g));
-    for j = 1:length(isp2List)
-        mFracTwo(j) = exp(deltaV2/(isp2List(j)*g));
-        % Calculate initial mass
-        mInit(i, j) = mPayload * ((mFracOne*(1-fInert))/(1-fInert*mFracOne)) * ((mFracTwo*(1-fInert))/(1-fInert*mFracTwo));
-    end
+    deltaVOne = alphaOne * deltaVTot;
+    deltaVTwo = alphaTwo * deltaVTot;
+    mFracOne = exp(deltaVOne/(specImpOne*g));
+    mFracTwo = exp(deltaVTwo/(specImpTwo*g));
+
+    % Calculate initial mass
+    mInit(i) = mPayload * ((mFracOne*(1-fInert))/(1-fInert*mFracOne)) * ((mFracTwo*(1-fInert))/(1-fInert*mFracTwo));
 
     % Update array index
     i = i + 1;
 end
 
-figure(1)
-
-plot(alphaList, mInit)
-xlim([0.33 0.5])
-
-legend("356 s", "372 s", "383 s", "399 s", "445 s")
 
