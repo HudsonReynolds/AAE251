@@ -1,4 +1,4 @@
-function [thrust, thrustReserve] = ThrustRequiredFunc()
+function [thrust, thrustReserve] = ThrustRequiredJetFunc()
 
 A = 88.2;
 [~, ~, ~, rho] = atmosisa(0);
@@ -10,9 +10,6 @@ cDa = 0.05;
 V = linspace(100,275, 176);
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
-
-Power = drag .* V;
-
 
 
 hfig = figure;  % save the figure handle in a variable

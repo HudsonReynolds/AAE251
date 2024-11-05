@@ -1,4 +1,5 @@
 %% LiftDragFunche
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds
 % Description: function that finds results from the lift and drag equation
 % assuming SLUF flight conditions
@@ -11,9 +12,11 @@
 % cDa - coefficient of drag multiple for induced drag
 % V - velocity [m/s]
 % W - weight of aircraft [kg]
-% outputs:
+%
+% Outputs:
 % pos - initial position vector
 % vel - initial velocity vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [cL, liftForce, dragForce] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W)
 
