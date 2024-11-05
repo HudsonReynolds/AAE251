@@ -1,4 +1,4 @@
-function [thrust] = ThrustCurveFunc(rho, vel, area, cD0, spanEfficiency, mass)
+function [thrust] = ThrustSLUFFunc(rho, vel, area, cD0, spanEfficiency, mass)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Preston Wright, Hudson Reynolds
 % Description: function that finds results from the lift and drag equation
