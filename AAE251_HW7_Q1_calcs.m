@@ -50,7 +50,7 @@ f_inert = m_inert / (m_inert + m_prop)
 
 MR2 = exp(dV1/C);
 
-m_i = m_pay * (MR3 * (1-f_inert) * MR2 * (1 - f_inert)) / ((1 - f_inert * MR2) * (1 - f_inert * MR3));
+m_i = m_pay * (MR3 * (1-f_inert) * MR2 * (1 - f_inert)) / ((1 - f_inert * MR2) * (1 - f_inert * MR3))
 
 m_f = m_i / MR2;
 
@@ -58,7 +58,7 @@ m_prop = m_i - m_f;
 
 m_inert = m_f - m_i2;
 
-f_inert = m_inert / (m_inert + m_prop);
+f_inert = m_inert / (m_inert + m_prop)
 
 
 
