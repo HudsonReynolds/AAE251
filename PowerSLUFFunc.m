@@ -1,4 +1,4 @@
-function [thrust] = ThrustSLUFFunc(rho, vel, area, cD0, spanEfficiency, mass)
+function [power] = PowerSLUFFunc(rho, vel, area, cD0, spanEfficiency, mass)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Preston Wright, Hudson Reynolds
 % Description: function that finds the thrust at SLUF for given conditions
@@ -12,12 +12,11 @@ function [thrust] = ThrustSLUFFunc(rho, vel, area, cD0, spanEfficiency, mass)
 % mass - mass of aircraft [kg]
 %
 % Outputs:
-% thrust - calculated thrust for given inputs
+% power - calculated thrust for given inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %% Initializations
 g = 9.81;
 
-%% Calculations 
-thrust = ((1/2) * rho * vel^2 * area * cD0) + ...
-    2 * spanEfficiency * ((mass * g)^2/(rho * area * vel^2));
+%% Calculations
+power = ((1/2) * rho * vel^3 * area * cD0) + ...
+    2 * spanEfficiency * ((mass * g)^2/(rho * area * vel));
