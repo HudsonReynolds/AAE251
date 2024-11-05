@@ -1,4 +1,18 @@
-function [thrust, thrustReserve] = ThrustRequiredJetFunc()
+function [thrust, thrustReserve] = ThrustRequiredJetFunc(V)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Author: Hudson Reynolds
+% Description: function that finds results from the lift and drag equation
+% assuming SLUF flight conditions
+% and outputs the forces
+%
+% Inputs:
+% V - velocity [m/s]
+%
+% Outputs:
+% thrust - the required thrust to maintain SLUF conditions [N]
+% thrustReserve - the percentage of thrust remaining [N]
+% plots - see outputs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 A = 88.2;
 [~, ~, ~, rho] = atmosisa(0);
@@ -7,7 +21,7 @@ cL0 = 0.02;
 cLa = 0.12;
 cD0 = 0.015;
 cDa = 0.05;
-V = linspace(100,275, 176);
+
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
 

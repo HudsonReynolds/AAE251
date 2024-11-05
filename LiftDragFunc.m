@@ -1,9 +1,11 @@
-%% LiftDragFunche
+%% LiftDragFunc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds
 % Description: function that finds results from the lift and drag equation
 % assuming SLUF flight conditions
 % and outputs the forces
+%
+% Inputs:
 % A - wing / reference area [m^2]
 % rho - density of air [kg/m^3]
 % cL0 - coefficient of lift at zero AoA
