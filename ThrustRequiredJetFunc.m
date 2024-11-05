@@ -25,6 +25,8 @@ cDa = 0.05;
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
 
+thrust = drag;
+
 
 hfig = figure;  % save the figure handle in a variable
 hold on
