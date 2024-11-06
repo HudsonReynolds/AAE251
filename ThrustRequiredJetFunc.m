@@ -1,9 +1,7 @@
 function [thrust, thrustReserve] = ThrustRequiredJetFunc(V)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds
-% Description: function that finds results from the lift and drag equation
-% assuming SLUF flight conditions
-% and outputs the forces
+% Description: function that finds thrust for jet based on velocity
 %
 % Inputs:
 % V - velocity [m/s]
@@ -14,13 +12,13 @@ function [thrust, thrustReserve] = ThrustRequiredJetFunc(V)
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-A = 88.2;
+A = 16.3;
 [~, ~, ~, rho] = atmosisa(0);
-W = 33100;
+W = 1315;
 cL0 = 0.02;
 cLa = 0.12;
-cD0 = 0.015;
-cDa = 0.05;
+cD0 = 0.026;
+cDa = 0.054;
 
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
