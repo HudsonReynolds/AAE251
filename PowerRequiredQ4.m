@@ -1,4 +1,4 @@
-function [power, powerReserve] = PowerRequiredQ4(V)
+function [power, powerReserve, maxV] = PowerRequiredQ4(V, height, plotVal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds, Preston Wright
 % Description: function that finds power for prop aircraft based on the
@@ -13,49 +13,64 @@ function [power, powerReserve] = PowerRequiredQ4(V)
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-height = 0;
+height = 4618.0248;
 V = 50:1:175;
 plotVal = 1;
 
-A = 16.3; %wing area [m^2]
+A = 39.4; %wing area [m^2]
+b = 19.78;
 [~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
 [~, ~, ~, rho] = atmosisa(height); % density of air [kg/m^3]
-W = 1315;      % weight [kg]
-cL0 = 0.02;    % zero AoA cL
-cLa = 0.12;    % slope of cL / alpha
-cD0 = 0.026;   % zero AoA cD
-cDa = 0.054;   % induced drag coefficient
-p0max = 216;   % sea level power [kW]
+W = 10500;      % weight [kg]
+cD0 = 0.021;   % zero AoA cD
+p0max = 1342.26 * 2 * 1000;   % sea level power [kW]
 eta = 0.8;     % propeller efficiency 
+e = 0.7;
+AR = b^2 / A
 
+cDa = 1 / (pi * e * AR);   % induced drag coefficient
 
-[~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
-
-power = drag .* V;
+power = 1/2 * rho * A * V.^3 * cD0 + 2 * (W * 9.81)^2 ./ (e * AR * pi * rho * A * V);
 
 powerMax = eta * (rho / rho0)^0.6 * p0max;
 
 powerReserve = 1 - (power / powerMax);
+
+[~, minIndex] = min(abs(power - powerMax));
+
+maxV = V(minIndex)
+
+syms x
+
+eqn = powerMax == 1/2 * rho * A * x^3 * cD0 + 2 * (W * 9.81)^2 / (e * AR * pi * rho * A * x);
+
+sol = solve(eqn, x, real=true)
+
+fprintf("%.2f\n %.2f\n", sol(1), sol(2))
 
 
 if plotVal == 1
     close all
     
     hfig = figure;  % save the figure handle in a variable
-    fname = 'Power v. Velocity Graph';
+    fname = 'Power v Velocity Graph Q4';
 
     hold on   
     
     plot(V, power / 1e3)
-    title("Velocity v. Power")
+    yline(powerMax/ 1e3 ,'r--')
+    title("Velocity v. Power at 15,151 ft")
     xlabel("Velocity [m/s]")
     ylabel("Power [kW]")
     
+
     
     
     picturewidth = 20; % set the width of image in cm
     hw_ratio = .6; % aspect ratio
     set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
+    
+    legend('Power Required', 'Max Power', 'FontSize', 12, 'location', 'northwest')
     
     
     grid on
