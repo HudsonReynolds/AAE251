@@ -1,6 +1,6 @@
 %% LiftDragFunc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Author: Hudson Reynolds
+% Author: Hudson Reynolds, Preston Wright
 % Description: function that finds results from the lift and drag equation
 % assuming SLUF flight conditions
 % and outputs the forces
