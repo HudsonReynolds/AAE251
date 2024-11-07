@@ -13,32 +13,43 @@ function [power, powerReserve, maxV] = PowerRequiredQ4(V, height, plotVal)
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% included so script doesn't throw errors when publishing. Delete these to
+% run it as a function
 height = 4618.0248;
 V = 50:1:175;
 plotVal = 0;
 
-A = 39.4; %wing area [m^2]
-b = 19.78;
-[~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
+%% Constants:
+
+[~, ~, ~, rho0] = atmosisa(0);     % density of air at sea level [kg/m^3]
 [~, ~, ~, rho] = atmosisa(height); % density of air [kg/m^3]
-W = 10500;      % weight [kg]
-cD0 = 0.021;   % zero AoA cD
-p0max = 1342.26 * 2 * 1000;   % sea level power [kW]
-eta = 0.8;     % propeller efficiency 
-e = 0.7;
-AR = b^2 / A
+A = 39.4;                          %wing area [m^2]
+b = 19.78;                         %wing length [m]
+W = 10500;                         % weight [kg]
+cD0 = 0.021;                       % zero AoA cD
+p0max = 1342.26 * 2 * 1000;        % sea level power [W]
+eta = 0.8;                         % propeller efficiency 
+e = 0.7;                           % oswald efficiency
+AR = b^2 / A;                      % wing aspect ratio
 
-cDa = 1 / (pi * e * AR);   % induced drag coefficient
 
+%% Calculations:
+
+cDa = 1 / (pi * e * AR);  % induced drag coefficient
+
+% perform power calculations:
 power = 1/2 * rho * A * V.^3 * cD0 + 2 * (W * 9.81)^2 ./ (e * AR * pi * rho * A * V);
 
 powerMax = eta * (rho / rho0)^0.6 * p0max;
 
 powerReserve = 1 - (power / powerMax);
 
+% find the power closest to the max power and the corresponding velocity:
 [~, minIndex] = min(abs(power - powerMax));
 
 maxV = V(minIndex);
+
+% solve symbolically to check:
 
 syms x
 
@@ -48,6 +59,7 @@ sol = solve(eqn, x, real=true);
 
 fprintf("%.2f\n %.2f\n", sol(1), sol(2))
 
+%% Plots
 
 if plotVal == 1
     close all
