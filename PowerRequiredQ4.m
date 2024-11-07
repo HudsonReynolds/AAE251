@@ -1,4 +1,4 @@
-function [power, powerReserve] = PowerRequiredPropFunc(V)
+function [power, powerReserve] = PowerRequiredQ4(V)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds, Preston Wright
 % Description: function that finds power for prop aircraft based on the
