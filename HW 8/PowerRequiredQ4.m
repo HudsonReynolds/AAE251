@@ -15,7 +15,7 @@ function [power, powerReserve, maxV] = PowerRequiredQ4(V, height, plotVal)
 
 height = 4618.0248;
 V = 50:1:175;
-plotVal = 1;
+plotVal = 0;
 
 A = 39.4; %wing area [m^2]
 b = 19.78;
@@ -38,13 +38,13 @@ powerReserve = 1 - (power / powerMax);
 
 [~, minIndex] = min(abs(power - powerMax));
 
-maxV = V(minIndex)
+maxV = V(minIndex);
 
 syms x
 
 eqn = powerMax == 1/2 * rho * A * x^3 * cD0 + 2 * (W * 9.81)^2 / (e * AR * pi * rho * A * x);
 
-sol = solve(eqn, x, real=true)
+sol = solve(eqn, x, real=true);
 
 fprintf("%.2f\n %.2f\n", sol(1), sol(2))
 

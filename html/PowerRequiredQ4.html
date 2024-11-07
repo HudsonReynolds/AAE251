@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>PowerRequiredQ4</title>
+<meta name="generator" content="MATLAB 23.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2024-11-07">
+<meta name="DC.source" content="PowerRequiredQ4.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">function</span> [power, powerReserve, maxV] = PowerRequiredQ4(V, height, plotVal)
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+<span class="comment">% Author: Hudson Reynolds, Preston Wright</span>
+<span class="comment">% Description: function that finds power for prop aircraft based on the</span>
+<span class="comment">% velocity</span>
+<span class="comment">%</span>
+<span class="comment">% Inputs:</span>
+<span class="comment">% V - velocity [m/s]</span>
+<span class="comment">%</span>
+<span class="comment">% Outputs:</span>
+<span class="comment">% thrust - the required thrust to maintain SLUF conditions [N]</span>
+<span class="comment">% thrustReserve - the percentage of thrust remaining [N]</span>
+<span class="comment">% plots - see outputs</span>
+<span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+
+height = 4618.0248;
+V = 50:1:175;
+plotVal = 0;
+
+A = 39.4; <span class="comment">%wing area [m^2]</span>
+b = 19.78;
+[~, ~, ~, rho0] = atmosisa(0); <span class="comment">% density of air at sea level [kg/m^3]</span>
+[~, ~, ~, rho] = atmosisa(height); <span class="comment">% density of air [kg/m^3]</span>
+W = 10500;      <span class="comment">% weight [kg]</span>
+cD0 = 0.021;   <span class="comment">% zero AoA cD</span>
+p0max = 1342.26 * 2 * 1000;   <span class="comment">% sea level power [kW]</span>
+eta = 0.8;     <span class="comment">% propeller efficiency</span>
+e = 0.7;
+AR = b^2 / A
+
+cDa = 1 / (pi * e * AR);   <span class="comment">% induced drag coefficient</span>
+
+power = 1/2 * rho * A * V.^3 * cD0 + 2 * (W * 9.81)^2 ./ (e * AR * pi * rho * A * V);
+
+powerMax = eta * (rho / rho0)^0.6 * p0max;
+
+powerReserve = 1 - (power / powerMax);
+
+[~, minIndex] = min(abs(power - powerMax));
+
+maxV = V(minIndex);
+
+syms <span class="string">x</span>
+
+eqn = powerMax == 1/2 * rho * A * x^3 * cD0 + 2 * (W * 9.81)^2 / (e * AR * pi * rho * A * x);
+
+sol = solve(eqn, x, real=true);
+
+fprintf(<span class="string">"%.2f\n %.2f\n"</span>, sol(1), sol(2))
+
+
+<span class="keyword">if</span> plotVal == 1
+    close <span class="string">all</span>
+
+    hfig = figure;  <span class="comment">% save the figure handle in a variable</span>
+    fname = <span class="string">'Power v Velocity Graph Q4'</span>;
+
+    hold <span class="string">on</span>
+
+    plot(V, power / 1e3)
+    yline(powerMax/ 1e3 ,<span class="string">'r--'</span>)
+    title(<span class="string">"Velocity v. Power at 15,151 ft"</span>)
+    xlabel(<span class="string">"Velocity [m/s]"</span>)
+    ylabel(<span class="string">"Power [kW]"</span>)
+
+
+
+
+    picturewidth = 20; <span class="comment">% set the width of image in cm</span>
+    hw_ratio = .6; <span class="comment">% aspect ratio</span>
+    set(findall(hfig,<span class="string">'-property'</span>,<span class="string">'FontSize'</span>),<span class="string">'FontSize'</span>,16) <span class="comment">% adjust font size</span>
+
+    legend(<span class="string">'Power Required'</span>, <span class="string">'Max Power'</span>, <span class="string">'FontSize'</span>, 12, <span class="string">'location'</span>, <span class="string">'northwest'</span>)
+
+
+    grid <span class="string">on</span>
+
+    set(findall(hfig,<span class="string">'-property'</span>,<span class="string">'Box'</span>),<span class="string">'Box'</span>,<span class="string">'off'</span>) <span class="comment">% turn off box</span>
+    set(findall(hfig,<span class="string">'-property'</span>,<span class="string">'Interpreter'</span>),<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+    set(findall(hfig,<span class="string">'-property'</span>,<span class="string">'TickLabelInterpreter'</span>),<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
+
+    set(hfig,<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[3 3 picturewidth hw_ratio*picturewidth])
+    pos = get(hfig,<span class="string">'Position'</span>);
+    set(hfig,<span class="string">'PaperPositionMode'</span>,<span class="string">'Auto'</span>,<span class="string">'PaperUnits'</span>,<span class="string">'centimeters'</span>,<span class="string">'PaperSize'</span>,[pos(3), pos(4)])
+    <span class="comment">%print(hfig,fname,'-dpdf','-vector','-fillpage')</span>
+
+    print(hfig,fname,<span class="string">'-dpng'</span>,<span class="string">'-r300'</span>)
+<span class="keyword">end</span>
+</pre>
+<pre class="codeoutput">
+AR =
+
+    9.9302
+
+19.86
+ 165.05
+
+ans =
+
+   1.0e+06 *
+
+  Columns 1 through 7
+
+    0.6827    0.6726    0.6630    0.6539    0.6454    0.6374    0.6299
+
+  Columns 8 through 14
+
+    0.6229    0.6163    0.6102    0.6044    0.5991    0.5942    0.5897
+
+  Columns 15 through 21
+
+    0.5856    0.5818    0.5784    0.5753    0.5726    0.5702    0.5682
+
+  Columns 22 through 28
+
+    0.5664    0.5650    0.5639    0.5631    0.5626    0.5624    0.5625
+
+  Columns 29 through 35
+
+    0.5628    0.5635    0.5644    0.5656    0.5671    0.5688    0.5709
+
+  Columns 36 through 42
+
+    0.5732    0.5757    0.5785    0.5816    0.5850    0.5886    0.5925
+
+  Columns 43 through 49
+
+    0.5966    0.6010    0.6056    0.6105    0.6157    0.6211    0.6268
+
+  Columns 50 through 56
+
+    0.6327    0.6389    0.6453    0.6520    0.6589    0.6661    0.6736
+
+  Columns 57 through 63
+
+    0.6813    0.6892    0.6975    0.7059    0.7147    0.7237    0.7329
+
+  Columns 64 through 70
+
+    0.7424    0.7522    0.7622    0.7725    0.7830    0.7939    0.8049
+
+  Columns 71 through 77
+
+    0.8163    0.8279    0.8398    0.8519    0.8643    0.8770    0.8899
+
+  Columns 78 through 84
+
+    0.9032    0.9167    0.9304    0.9445    0.9588    0.9734    0.9883
+
+  Columns 85 through 91
+
+    1.0035    1.0189    1.0346    1.0506    1.0669    1.0835    1.1004
+
+  Columns 92 through 98
+
+    1.1176    1.1350    1.1528    1.1708    1.1891    1.2078    1.2267
+
+  Columns 99 through 105
+
+    1.2459    1.2655    1.2853    1.3055    1.3259    1.3467    1.3677
+
+  Columns 106 through 112
+
+    1.3891    1.4108    1.4328    1.4551    1.4777    1.5007    1.5240
+
+  Columns 113 through 119
+
+    1.5476    1.5715    1.5957    1.6203    1.6452    1.6704    1.6960
+
+  Columns 120 through 126
+
+    1.7219    1.7481    1.7747    1.8016    1.8288    1.8564    1.8844
+
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2023b</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+function [power, powerReserve, maxV] = PowerRequiredQ4(V, height, plotVal)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Author: Hudson Reynolds, Preston Wright
+% Description: function that finds power for prop aircraft based on the
+% velocity
+%
+% Inputs:
+% V - velocity [m/s]
+%
+% Outputs:
+% thrust - the required thrust to maintain SLUF conditions [N]
+% thrustReserve - the percentage of thrust remaining [N]
+% plots - see outputs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+height = 4618.0248;
+V = 50:1:175;
+plotVal = 0;
+
+A = 39.4; %wing area [m^2]
+b = 19.78;
+[~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
+[~, ~, ~, rho] = atmosisa(height); % density of air [kg/m^3]
+W = 10500;      % weight [kg]
+cD0 = 0.021;   % zero AoA cD
+p0max = 1342.26 * 2 * 1000;   % sea level power [kW]
+eta = 0.8;     % propeller efficiency 
+e = 0.7;
+AR = b^2 / A
+
+cDa = 1 / (pi * e * AR);   % induced drag coefficient
+
+power = 1/2 * rho * A * V.^3 * cD0 + 2 * (W * 9.81)^2 ./ (e * AR * pi * rho * A * V);
+
+powerMax = eta * (rho / rho0)^0.6 * p0max;
+
+powerReserve = 1 - (power / powerMax);
+
+[~, minIndex] = min(abs(power - powerMax));
+
+maxV = V(minIndex);
+
+syms x
+
+eqn = powerMax == 1/2 * rho * A * x^3 * cD0 + 2 * (W * 9.81)^2 / (e * AR * pi * rho * A * x);
+
+sol = solve(eqn, x, real=true);
+
+fprintf("%.2f\n %.2f\n", sol(1), sol(2))
+
+
+if plotVal == 1
+    close all
+    
+    hfig = figure;  % save the figure handle in a variable
+    fname = 'Power v Velocity Graph Q4';
+
+    hold on   
+    
+    plot(V, power / 1e3)
+    yline(powerMax/ 1e3 ,'rREPLACE_WITH_DASH_DASH')
+    title("Velocity v. Power at 15,151 ft")
+    xlabel("Velocity [m/s]")
+    ylabel("Power [kW]")
+    
+
+    
+    
+    picturewidth = 20; % set the width of image in cm
+    hw_ratio = .6; % aspect ratio
+    set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
+    
+    legend('Power Required', 'Max Power', 'FontSize', 12, 'location', 'northwest')
+    
+    
+    grid on
+    
+    set(findall(hfig,'-property','Box'),'Box','off') % turn off box
+    set(findall(hfig,'-property','Interpreter'),'Interpreter','latex') 
+    set(findall(hfig,'-property','TickLabelInterpreter'),'TickLabelInterpreter','latex')
+    
+    set(hfig,'Units','centimeters','Position',[3 3 picturewidth hw_ratio*picturewidth])
+    pos = get(hfig,'Position');
+    set(hfig,'PaperPositionMode','Auto','PaperUnits','centimeters','PaperSize',[pos(3), pos(4)])
+    %print(hfig,fname,'-dpdf','-vector','-fillpage')
+    
+    print(hfig,fname,'-dpng','-r300')
+end
+##### SOURCE END #####
+-->
+</body>
+</html>
