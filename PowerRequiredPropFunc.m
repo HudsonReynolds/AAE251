@@ -13,24 +13,6 @@ function [power, powerReserve] = PowerRequiredPropFunc(V)
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%function [thrust, thrustReserve] = ThrustRequiredJetFunc(V, height, plot)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Author: Hudson Reynolds
-% Description: function that finds thrust for jet based on velocity
-%
-% Inputs:
-% V - velocity [m/s]
-% height - current altitude of jet [m]
-% plot - turn plotting on or off. Set to 1 to plot.
-%
-% Outputs:
-% thrust - the required thrust to maintain SLUF conditions [N]
-% thrustReserve - the percentage of thrust remaining [N]
-% plots - see outputs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% constants:
-
 height = 0;
 V = 50:1:175;
 plotVal = 1;
