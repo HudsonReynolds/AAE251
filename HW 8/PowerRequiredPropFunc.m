@@ -13,20 +13,22 @@ function [power, powerReserve] = PowerRequiredPropFunc(V, height, plotVal)
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% included so script doesn't throw errors when publishing. Delete these to
+% run it as a function
 height = 0;
 V = 50:1:175;
 plotVal = 1;
 
-A = 16.3; %wing area [m^2]
-[~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
+[~, ~, ~, rho0] = atmosisa(0);     % density of air at sea level [kg/m^3]
 [~, ~, ~, rho] = atmosisa(height); % density of air [kg/m^3]
-W = 1315;      % weight [kg]
-cL0 = 0.02;    % zero AoA cL
-cLa = 0.12;    % slope of cL / alpha
-cD0 = 0.026;   % zero AoA cD
-cDa = 0.054;   % induced drag coefficient
-p0max = 216;   % sea level power [kW]
-eta = 0.8;     % propeller efficiency 
+A = 16.3;                          %wing area [m^2]
+W = 1315;                          % weight [kg]
+cL0 = 0.02;                        % zero AoA cL
+cLa = 0.12;                        % slope of cL / alpha
+cD0 = 0.026;                       % zero AoA cD
+cDa = 0.054;                       % induced drag coefficient
+p0max = 216;                       % sea level power [kW]
+eta = 0.8;                         % propeller efficiency 
 
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
