@@ -44,10 +44,11 @@ if plot == 1
     close all
     
     hfig = figure;  % save the figure handle in a variable
+    fname = 'Thrust v. Velocity Graph';
+
 
     hold on
     
-    fname = 'Thrust v. Velocity Graph';
     
     plot(V, thrust)
     title("Velocity v. Thrust")
