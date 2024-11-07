@@ -44,7 +44,7 @@ if plotVal == 1
     close all
     
     hfig = figure;  % save the figure handle in a variable
-    fname = 'Power v. Velocity Graph';
+    fname = 'Power v Velocity Graph';
 
     hold on   
     
