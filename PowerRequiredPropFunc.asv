@@ -31,9 +31,9 @@ function [power, powerReserve] = PowerRequiredPropFunc(V)
 
 % constants:
 
-height = 0;
-V = 50:1:175;
-plotVal = 1;
+height = 0
+V = 50:1:52
+plotVal = 1
 
 A = 16.3; %wing area [m^2]
 [~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
@@ -49,7 +49,9 @@ eta = 0.8;     % propeller efficiency
 
 [~, lift, drag] = LiftDragFunc(A, rho, cL0, cLa, cD0, cDa, V, W);
 
-power = drag .* V;
+power = drag .* V
+
+power = 1/2 * rho * A * V.^3 * cD0 + 2 * cDa * (W * 9.81)^2 ./ (rho * A * V)
 
 powerMax = eta * (rho / rho0)^0.6 * p0max;
 

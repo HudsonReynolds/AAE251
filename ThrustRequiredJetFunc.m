@@ -1,4 +1,4 @@
-%function [thrust, thrustReserve] = ThrustRequiredJetFunc(V, height, plot)
+function [thrust, thrustReserve] = ThrustRequiredJetFunc(V, height, plotVal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Hudson Reynolds
 % Description: function that finds thrust for jet based on velocity
@@ -14,20 +14,20 @@
 % plots - see outputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+height = 0
+V = 100:1:275
+plotVal = 1
+
 % constants:
 
-height = 0
-V = linspace(100,275,176)
-plot = 1
-
-A = 16.3; %wing area [m^2]
-[~, ~, ~, rho0] = atmosisa(0); % density of air at sea level [kg/m^3]
+A = 88.2; %wing area [m^2]
+[~, ~, ~, rho0] = atmosisa(0);     % density of air at sea level [kg/m^3]
 [~, ~, ~, rho] = atmosisa(height); % density of air [kg/m^3]
-W = 1315; % weight [kg]
-cL0 = 0.02; % zero AoA cL
-cLa = 0.12;  % slope of cL / alpha
-cD0 = 0.026; % zero AoA cD
-cDa = 0.054; % induced drag coefficient
+W = 33100;      % weight [kg]
+cL0 = 0.02;    % zero AoA cL
+cLa = 0.12;    % slope of cL / alpha
+cD0 = 0.015;   % zero AoA cD
+cDa = 0.05;   % induced drag coefficient
 t0max = 55620; % sea level thrust [N]
 
 
@@ -37,10 +37,10 @@ thrust = drag;
 
 thrustMax = (rho / rho0)^0.6 * t0max;
 
-thrustReserve = 1 - thrust / thrustMax;
+thrustReserve = 1 - (thrust / thrustMax);
 
 
-if plot == 1
+if plotVal == 1
     close all
     
     hfig = figure;  % save the figure handle in a variable
