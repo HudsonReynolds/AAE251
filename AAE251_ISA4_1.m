@@ -17,7 +17,7 @@ Az= 90;                % azimuth of launch [deg]
 isp = 420;             % isp of rocket [s]
 mPay = 4800;           % payload mass [kg]
 g =9.807;              % gravitational acceleration [m/s^2]
-plotVal = 1;           % turn plotting on or off
+plotVal = 0;           % turn plotting on or off
 
 
 %% Calculations:
