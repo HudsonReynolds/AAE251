@@ -18,7 +18,7 @@ thrustMax = ;           % Maximum available thrust at sea level [kN]
 area = ;                % Wing area [m]
 e = ;                   % Oswald effeciency factor
 aspectRatio = ;         % Aspect ratio of wing
-minimumDrag = ;         % Parasitic drag
+parasiteDrag = ;        % Parasitic drag
 
 
 %% Calculations
@@ -29,7 +29,7 @@ for i = 1:length(alt)
     [~,~,~,rhoAlt] = atmosisa(alt(i)*1000);
 
     thrustAvailable(i) = ((rhoAlt/rhoSea)^mAD)*thrustMax;
-    thrustRequired(i) = 2*m*g*sqrt(K*minimumDrag);
+    thrustRequired(i) = 2*m*g*sqrt(K*parasiteDrag);
 end
 
 %% Graphing

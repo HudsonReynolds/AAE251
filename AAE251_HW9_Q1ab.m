@@ -6,31 +6,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initializations
 
-alt = linspace(0,30,30/100+1);  % Altitude array [km]
+alt = linspace(0,30,30*100+1);  % Altitude array [km]
 powerAvailable = [];            % Initialized available power array [kW]
 powerRequired = [];             % Initialized required power array [kN]
 
 rhoSea = 1.2250;        % Density at sea level [kg/m^3]
 g = 9.81;               % Gravitational acceleration [m/s^2]
 m = 1315;               % Mass of the aircraft [kg]
-mAD = 0.9;              % Air density exponent
-powerMax = ;            % Maximum available power at sea level [kW]
+mAD = 0.6;              % Air density exponent
+K = 0.054;              % Span efficiency
+powerMax = 216;         % Maximum available power at sea level [kW]
 propEff = 0.8;          % Propeller efficiency
 area = 16.3;            % Wing area [m]
-e = ;                   % Oswald effeciency factor
-aspectRatio = ;         % Aspect ratio of wing
-minimumDrag = ;         % Parasitic drag
+parasiteDrag = 0.026;   % Parasitic drag
 
 
 %% Calculations
 
-K = 1/(pi*e*aspectRatio);
-
 for i = 1:length(alt)
     [~,~,~,rhoAlt] = atmosisa(alt(i)*1000);
 
-    powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax;
-    powerRequired(i) = (4/3)*(((2*(m*g)^3)/(rho*area))*sqrt(3*(K^3)*minimumDrag));
+    powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax*1000;
+    powerRequired(i) = (4/3)*sqrt(((2*(m*g)^3)/(rhoAlt*area))*sqrt(3*(K^3)*parasiteDrag));
 end
 
 %% Graphing
