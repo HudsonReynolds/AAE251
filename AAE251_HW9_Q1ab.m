@@ -3,6 +3,9 @@
 % Homework 9
 % AAE251_HW9_Q1ab
 % Author: Preston Wright and Hudson Reynolds
+% Description: Sets up and calculates the available and required power with
+% respect to altitude for a given GA aircraft, plotting those values versus
+% the altitude used to calculate them.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initializations
 
@@ -26,7 +29,6 @@ parasiteDrag = 0.026;   % Parasitic drag
 % Loop through the altitudes calculating the available and required power
 for i = 1:length(alt)
     [~,~,~,rhoAlt] = atmosisa(alt(i)*1000,extended="on");
-
     powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax;
     powerRequired(i) = (4/3)*sqrt(((2*(m*g)^3)/(rhoAlt*area))*sqrt(3*(K^3)*parasiteDrag))/1000;
 end
@@ -42,5 +44,5 @@ grid minor
 title("Available and Required Power Vs. Altitude")
 xlabel("Altitude [km]")
 ylabel("Power [kW]")
-legend("Required Power", "Available Power")
+legend("Required Power", "Available Power", location="northwest")
 

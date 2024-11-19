@@ -3,6 +3,9 @@
 % Homework 9
 % AAE251_HW9_Q1cd
 % Author: Preston Wright and Hudson Reynolds
+% Description: Sets up and calculates the available and required thrust with
+% respect to altitude for a given jet aircraft, plotting those values versus
+% the altitude used to calculate them.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initializations
 
@@ -39,5 +42,5 @@ grid minor
 title("Available and Required Thrust Vs. Altitude")
 xlabel("Altitude [km]")
 ylabel("Thrust [kN]")
-legend("Required Thrust", "Available Thrust")
+legend("Required Thrust", "Available Thrust", location="northeast")
 
