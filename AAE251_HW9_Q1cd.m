@@ -10,14 +10,14 @@
 %% Initializations
 
 alt = linspace(0,30,30*100+1);   % Altitude array [km]
-thrustAvailable = [];            % Initialized available power array [kW]
-thrustRequired = [];             % Initialized required power array [kN]
+thrustAvailable = [];            % Initialized available thrust array [N]
+thrustRequired = [];             % Initialized required thrust array [N]
 
 rhoSea = 1.2250;        % Density at sea level [kg/m^3]
 g = 9.81;               % Gravitational acceleration [m/s^2]
 m = 33100;              % Mass of the aircraft [kg]
 mAD = 0.6;              % Air density exponent
-thrustMax = 55620;      % Maximum available thrust at sea level [kN]
+thrustMax = 55620;      % Maximum available thrust at sea level [N]
 K = 0.05;               % Wingspan efficiency
 parasiteDrag = 0.015;   % Parasitic drag
 
@@ -41,6 +41,6 @@ plot(alt,thrustAvailable)
 grid minor
 title("Available and Required Thrust Vs. Altitude")
 xlabel("Altitude [km]")
-ylabel("Thrust [kN]")
+ylabel("Thrust [N]")
 legend("Required Thrust", "Available Thrust", location="northeast")
 
