@@ -24,7 +24,7 @@ parasiteDrag = 0.026;   % Parasitic drag
 %% Calculations
 
 for i = 1:length(alt)
-    [~,~,~,rhoAlt] = atmosisa(alt(i)*1000);
+    [~,~,~,rhoAlt] = atmosisa(alt(i)*1000,extended="on");
 
     powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax*1000;
     powerRequired(i) = (4/3)*sqrt(((2*(m*g)^3)/(rhoAlt*area))*sqrt(3*(K^3)*parasiteDrag));
