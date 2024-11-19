@@ -23,15 +23,17 @@ parasiteDrag = 0.026;   % Parasitic drag
 
 %% Calculations
 
+% Loop through the altitudes calculating the available and required power
 for i = 1:length(alt)
     [~,~,~,rhoAlt] = atmosisa(alt(i)*1000,extended="on");
 
-    powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax*1000;
-    powerRequired(i) = (4/3)*sqrt(((2*(m*g)^3)/(rhoAlt*area))*sqrt(3*(K^3)*parasiteDrag));
+    powerAvailable(i) = propEff*((rhoAlt/rhoSea)^mAD)*powerMax;
+    powerRequired(i) = (4/3)*sqrt(((2*(m*g)^3)/(rhoAlt*area))*sqrt(3*(K^3)*parasiteDrag))/1000;
 end
 
 %% Graphing
 
+% Output the required and available power with respect to altitude
 figure(1)
 plot(alt,powerRequired)
 hold on

@@ -21,15 +21,16 @@ parasiteDrag = 0.015;   % Parasitic drag
 
 %% Calculations
 
+% Loop through the altitudes calculating the available and required thrust
 for i = 1:length(alt)
     [~,~,~,rhoAlt] = atmosisa(alt(i)*1000, extended="on");
-
     thrustAvailable(i) = ((rhoAlt/rhoSea)^mAD)*thrustMax;
     thrustRequired(i) = 2*m*g*sqrt(K*parasiteDrag);
 end
 
 %% Graphing
 
+% Output the required and available thrust with respect to altitude
 figure(1)
 plot(alt,thrustRequired)
 hold on
