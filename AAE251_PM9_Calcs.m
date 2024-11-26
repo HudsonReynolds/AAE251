@@ -97,13 +97,3 @@ for i = 1:length(payload)
     fprintf("Final Payload Mass for %s is %.2f and Initial Mass is %.2f. Payload limit is %.2f\n",launchVehicle(i), mPay, mI1, capacity)
 
 end
-
-
-
-
-
-
-
-
-
-
