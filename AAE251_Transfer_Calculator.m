@@ -24,7 +24,7 @@ close all;
 
 plotnum1 = 0;
 plotnum2 = 1;
-plotnum3 = 1;
+plotnum3 = 0;
 
 % conversions
 
@@ -34,8 +34,8 @@ G = 6.6743e-11;
 
 % simulation timestep parameters
 time = 0;      % simulation starting time [s]
-dt = 3600;      % time step [s]
-timespan = s2yr; % span of time to integrate over [s]
+dt = 10;      % time step [s]
+timespan = (s2yr/365) * 10; % span of time to integrate over [s]
 
 % Sun Inits: Initialize with no velocity, act as zero velocity reference
 % x, y, z initial coordinates of sun:
@@ -57,33 +57,41 @@ earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
 earthMass = 5.9722e24;  % mass of Earth [kg]
 
 % calculate the cartesian state for the given inputs:
-[earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos);
+[earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0);
 
 % Venus Inits, pulled from J2000:
 venusA = 0.723 * AU2km; % semi major axis
-venusE = 0.00677;   % eccentricity
-venusI = 3.39471;    % inclination
-venusRAAN = 76.68069; % longitude of ascending node [deg]
-venusAOP = 131.53298;  % argument of periapsis [deg]
+venusE = 0.00677;       % eccentricity
+venusI = 3.39471;       % inclination
+venusRAAN = 76.68069;   % longitude of ascending node [deg]
+venusAOP = 131.53298;   % argument of periapsis [deg]
 venusMeanLong = 181.97973;
-venusMu = 0.1;  % gravitational constant 
+venusMu = 3.248e5;  % gravitational constant 
 % calculate the cartesian state for the given inputs:
-[venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos);
+[venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos, 0);
 
 % Satellite Inits:
 satA = 6600;     % semi major axis
 satE = 0;    % eccentricity
-satI = 28.5;     % inclination
-satRAAN = 50;  % longitude of ascending node [deg]
+satI = 28;     % inclination
+satRAAN = 20;  % longitude of ascending node [deg]
 satAOP = 90;   % argument of periapsis [deg]
-satMeanLong = 0;
+satMeanLong = 5;
 % calculate the cartesian state for the given inputs:
-[satPos, satVel] = orbitalElements(satA, satE, satI, satRAAN, satAOP, satMeanLong, sunMu, sunPos);
+[satPos, satVel] = orbitalElements(satA, satE, satI, satRAAN, satAOP, satMeanLong, earthMu, earthPos, earthVel);
 
 % manuver inits:
-burnStartTime = 3.5; % start time of burn [s]
-burnDuration = .2;   % duration of burn [s]
-deltaV = .5;         % change in velocity of burn [-/s]
+burn1StartTime = 3600*.9; % start time of burn [s]
+dV1 = 3.5;         % change in velocity of burn [km/s]
+
+%prealloc arrays for speed:
+
+sunPosArray = zeros(timespan / dt, 3);
+earthPosArray = zeros(timespan / dt, 3);
+earthVelArray = zeros(timespan / dt, 3);
+venusPosArray = zeros(timespan / dt, 3);
+satPosArray = zeros(timespan / dt, 3);
+satVelArray = zeros(timespan / dt, 3);
 
 %% Main simulation loop:
 
@@ -100,7 +108,7 @@ for i = 1:endTime
     %earth rk4 method:
     rEarth = sunPos - earthPos;
     % rk4 integrate:
-    earthVel = rk4(@(t,y)accel(t,earthVel,rEarth, 0, 0, 0, sunMu, 0), dt, t, earthVel);
+    earthVel = rk4(@(t,y)accel(t,earthVel,rEarth,sunMu), dt, t, earthVel);
     earthPos = rk4(@(t,y)vel(t,earthVel), dt, t, earthPos);
     earthPosArray(i,:) = earthPos;
     earthVelArray(i,:) = earthVel;
@@ -108,20 +116,34 @@ for i = 1:endTime
     %venus rk4 method:
     rVenus = sunPos - venusPos;
     % rk4 integrate:
-    venusVel = rk4(@(t,y)accel(t,venusVel,rVenus, 0, 0, 0, sunMu, 0), dt, t, venusVel);
+    venusVel = rk4(@(t,y)accel(t,venusVel,rVenus, sunMu), dt, t, venusVel);
     venusPos = rk4(@(t,y)vel(t,venusVel), dt, t, venusPos);
     venusPosArray(i,:) = venusPos;
 
     %sat rk4 method:
-    rSatPlanet = sunPos - satPos;
-    rSatMoon = earthPos - satPos;
+    rSatEarth = earthPos - satPos;
+    rSatVenus = venusPos - satPos;
+    rSatSun = sunPos - satPos;
     % define vectors for multibody dynamics:
-    rList = [rSatPlanet, rSatMoon];
-    muList = [sunMu, earthMu];
+    rList = [rSatEarth, rSatVenus, rSatSun];
+    muList = [earthMu, venusMu, sunMu];
     % rk4 integrate:
-    satVel = rk4(@(t,y)accel(t,satVel,rList, burnStartTime, burnDuration, deltaV, muList, 1), dt, t, satVel);
+    satVel = rk4(@(t,y)accel(t,satVel,rList, muList), dt, t, satVel);
+
+    thrustAccel = 0;
+
+    %thrust force:
+    if t >= burn1StartTime && t < burn1StartTime + dt
+        % apply force along the velocity vector
+        deltaV1 = satVel / norm(satVel) * dV1
+
+        satVel = satVel + deltaV1
+    end
+
+
     satPos = rk4(@(t,y)vel(t,satVel), dt, t, satPos);
     satPosArray(i,:) = satPos;
+    satVelArray(i,:) = satVel;
 end
 
 
@@ -172,7 +194,7 @@ end
 if plotnum2 == 1
 
     hfig = figure;  % save the figure handle in a variable
-    fname = '3D Plnaets Plot';
+    fname = '3D Planets Plot';
 
 
     picturewidth = 20; % set the width of image in cm
@@ -182,7 +204,7 @@ if plotnum2 == 1
 
     plot3(sunPosArray(:,1), sunPosArray(:,2), sunPosArray(:,3), '.', 'MarkerSize', 20, 'Color', '#FFA500')
     hold on
-    %plot3(satPosArray(:,1), satPosArray(:,2), satPosArray(:,3), 'LineWidth', 1, 'Color','#f97306')
+    plot3(satPosArray(:,1), satPosArray(:,2), satPosArray(:,3), 'LineWidth', 1, 'Color','#f97306')
     plot3(earthPosArray(:,1), earthPosArray(:,2), earthPosArray(:,3), 'LineWidth', 1.5, 'Color', '#3b3b3b')
     plot3(venusPosArray(:,1), venusPosArray(:,2), venusPosArray(:,3), 'LineWidth', 1.5, 'Color', 'red')
     %plot3(satPosArray(burnIndex,1), satPosArray(burnIndex,2), satPosArray(burnIndex, 3), 'r*')
@@ -190,7 +212,52 @@ if plotnum2 == 1
     xlabel('Displacement-X')
     ylabel('Displacement-Y')
     zlabel('Displacement-Z')
-    legend('Sun', 'Earth', 'Venus')
+    legend('Sun', 'Sat', 'Earth', 'Venus')
+    hold off
+    
+    grid on
+    
+    set(findall(hfig,'-property','Box'),'Box','off') % turn off box
+    set(findall(hfig,'-property','Interpreter'),'Interpreter','latex') 
+    set(findall(hfig,'-property','TickLabelInterpreter'),'TickLabelInterpreter','latex')
+    
+
+
+    set(hfig,'Units','centimeters','Position',[3 3 picturewidth hw_ratio*picturewidth])
+    pos = get(hfig,'Position');
+    set(hfig,'PaperPositionMode','Auto','PaperUnits','centimeters','PaperSize',[pos(3), pos(4)])
+    %print(hfig,fname,'-dpdf','-vector','-fillpage')
+    
+    print(hfig,fname,'-dpng','-r300')
+
+
+    xl = xlim;
+    yl = ylim;
+    zl = zlim;
+    
+    %axis equal
+end
+
+% Trajectory figure 2
+
+if plotnum2 == 1
+
+    hfig = figure;  % save the figure handle in a variable
+    fname = 'Sat Earth Plot';
+
+
+    picturewidth = 20; % set the width of image in cm
+    hw_ratio = .6; % aspect ratio
+    set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
+    plot3(earthPosArray(:,1), earthPosArray(:,2), earthPosArray(:,3), 'LineWidth', 1.5, 'Color', '#3b3b3b')
+    hold on
+    plot3(satPosArray(:,1), satPosArray(:,2), satPosArray(:,3), 'LineWidth', 1, 'Color','#f97306')
+    %plot3(satPosArray(burnIndex,1), satPosArray(burnIndex,2), satPosArray(burnIndex, 3), 'r*')
+    title('Earth-Sat 3D')
+    xlabel('Displacement-X')
+    ylabel('Displacement-Y')
+    zlabel('Displacement-Z')
+    legend('Earth', 'Sat')
     hold off
     
     grid on
@@ -219,7 +286,7 @@ end
 % Trajectory Animation:
 if plotnum1 == 1
     figure(1)
-    curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
+    %curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
     curve1 = animatedline('LineWidth', 1, 'Color','#f97306');
     curve2 = animatedline('LineWidth', 1.5, 'Color', '#3b3b3b');
     xlabel('Displacement-X')
@@ -231,15 +298,15 @@ if plotnum1 == 1
     
     output = 0;
     playbackSpeed = 2;
-    
-    xlim(xl);
-    ylim(yl);
-    zlim(zl);
+    % 
+    % xlim(xl);
+    % ylim(yl);
+    % zlim(zl);
 
     for i=1:endTime
-        addpoints(curve, sunPosArray(i,1), sunPosArray(i,2), sunPosArray(i,3));
+        %addpoints(curve, sunPosArray(i,1), sunPosArray(i,2), sunPosArray(i,3));
         addpoints(curve1,earthPosArray(i,1), earthPosArray(i,2), earthPosArray(i,3));
-        %addpoints(curve2,earthPosArray(i,1), earthPosArray(i,2), earthPosArray(i,3));
+        addpoints(curve2,satPosArray(i,1), satPosArray(i,2), satPosArray(i,3));
         title(sprintf("Satellite Trajectory at time %.2f days", tArray(i) / (3600 * 24)));
         drawnow;
         %pause(dt / playbackSpeed);
@@ -296,7 +363,7 @@ end
 % burn - 0 => no burn compute, 1 => burn compute
 % outputs:
 % dv - acceleration vector for integration
-function dv = accel(t, v, r, burnStart, burnDuration, dV, mu, burn)
+function dv = accel(t, v, r, mu)
     % gravity forces:
     gravAccel = 0;
     for i = 1:length(mu)
@@ -305,16 +372,7 @@ function dv = accel(t, v, r, burnStart, burnDuration, dV, mu, burn)
         gravAccel = gravAccel + (mu(i) / (norm(r(r0:rf))^2) * (r(r0:rf) / norm(r(r0:rf))));
     end
     
-    thrustAccel = 0;
-
-    if burn == 1
-        %thrust force:
-        if t >= burnStart && t <= (burnStart + burnDuration)
-            % apply force along the velocity vector
-            thrustAccel = (v / norm(v)) * (dV / burnDuration);
-        end
-    end
-    dv = gravAccel + thrustAccel;
+    dv = gravAccel;
 end
 
 %% Velocity Function
@@ -341,12 +399,15 @@ end
 % outputs:
 % pos - initial position vector
 % vel - initial velocity vector
-function [pos, vel] = orbitalElements(a, e, i, raan, aop, meanLong, mu, posInit)
+function [pos, vel] = orbitalElements(a, e, i, raan, lop, meanLong, mu, posInit, velInit)
 
 % convert inputs to radians:
 raan = deg2rad(raan);
 i = deg2rad(i);
-aop = deg2rad(aop);
+lop = deg2rad(lop);
+meanLong = deg2rad(meanLong);
+
+aop = lop - raan;
 
 %% FIX THE AOP ISSUE
 
@@ -360,11 +421,10 @@ vecRotMat = eul2rotm([raan, i, aop + meanAnomoly], 'ZXZ');
 % find the vector pointing towards the periapsis
 vec = vecRotMat * [1;0;0];
 
-
 % find the length of the periapsis from orbital elements:
-periapsis = a * (1 - e)
+periapsis = a * (1 - e);
 
-r = a * (1 - e^2) / (1 + e * cosd(meanAnomoly))
+r = a * (1 - e^2) / (1 + e * cos(meanAnomoly));
 
 % find the initial position (add parent body origin to get absolute origin)
 pos = vec.' * periapsis + posInit;
@@ -374,7 +434,7 @@ pos = vec.' * r + posInit;
 % get velocity from vis-viva
 velMag = sqrt(mu * ((2/periapsis) - (1 / a)));
 
-velMag = sqrt(mu * ((2/r) - (1 / a)))
+velMag = sqrt(mu * ((2/r) - (1 / a)));
 
 % find the velocity vector:
 % find another vector 90 degrees along orbit plane:
@@ -386,5 +446,5 @@ orbitNorm = cross(vec2, vec) / norm(cross(vec2, vec));
 
 % find orbit velocity direction w/ cross product:
 velDir = cross(orbitNorm, vec) / norm(cross(orbitNorm, vec));
-vel = (velMag * velDir).';
+vel = (velMag * velDir).' + velInit;
 end
