@@ -20,6 +20,6 @@ L0rad = deg2rad(L0);
 
 meanLong = L0rad + n * timediff;
 
-meanLong = rad2deg(meanLong);
+meanLong = mod(rad2deg(meanLong), 360);
 
 

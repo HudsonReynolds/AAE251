@@ -25,7 +25,7 @@ close all;
 plotnum1 = 0;
 plotnum2 = 1;
 plotnum3 = 0;
-plotnum4 = 1;
+plotnum4 = 0;
 
 % conversions
 
@@ -41,7 +41,7 @@ dt = 600;      % time step [s]
 
 transferTime = 147 * days2s; % amount of time for the transfer
 
-t2 = datetime('2025-March-12'); % date at which the simulation starts
+t2 = datetime('15-11-2025', 'InputFormat','dd-MM-yyyy'); % date at which the simulation starts
 
 tInt = t2 + seconds(transferTime);
 
@@ -75,7 +75,9 @@ earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
 earthMass = 5.9722e24;  % mass of Earth [kg]
 
 % calculate the cartesian state for the given inputs:
-[earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0);
+[earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0)
+
+[earthPos, earthVel] = planetEphemeris(juliandate(t2), 'Sun', 'Earth')
 
 % Venus Inits, pulled from J2000 on Jan 11, 2024:
 t1Venus = datetime('2024-January-11');
@@ -95,6 +97,8 @@ venusMu = 3.248e5;  % gravitational constant
 % calculate the cartesian state for the given inputs:
 [venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos, 0);
 
+[venusPos, venusVel] = planetEphemeris(juliandate(t2), 'Sun', 'Venus')
+
 endTime = timespan / dt;
 
 %prealloc arrays for speed:
@@ -107,17 +111,7 @@ satPosArray = zeros(timespan / dt, 3);
 satVelArray = zeros(timespan / dt, 3);
 tArray = zeros(timespan/dt , 1);
 
-for i = 1:endTime
-    t = dt * i;
-    %venus rk4 method:
-    rVenus = sunPos - venusPos;
-    % rk4 integrate:
-    venusVel = rk4(@(t,y)accel(t,venusVel,rVenus, sunMu), dt, t, venusVel);
-    venusPos = rk4(@(t,y)vel(t,venusVel), dt, t, venusPos);
-    venusPosArray(i,:) = venusPos;
-end
-
-venusPosIntercept = venusPosArray(end,:)
+venusPosIntercept = planetEphemeris(juliandate(t2) + transferTime / days2s, 'Sun', 'Venus')
 
 % Satellite Inits:
 % satA = 6600;     % semi major axis
