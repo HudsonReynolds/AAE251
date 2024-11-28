@@ -25,17 +25,27 @@ close all;
 plotnum1 = 0;
 plotnum2 = 1;
 plotnum3 = 0;
+plotnum4 = 1;
 
 % conversions
 
 AU2km = 1.496e8; % 1 AU in kilometers
-s2yr = 3.1536e7; % number of seconds in year
-G = 6.6743e-11;
+yr2s = 3.1536e7; % number of seconds in year
+G = 6.6743e-11;  % gravitational constant
+days2s = 86400;  % number of seconds in a day
 
-% simulation timestep parameters
+
+% simulation time parameters
 time = 0;      % simulation starting time [s]
 dt = 600;      % time step [s]
-timespan = (s2yr/365) * 140; % span of time to integrate over [s]
+
+transferTime = 147 * days2s; % amount of time for the transfer
+
+t2 = datetime('2025-March-12'); % date at which the simulation starts
+
+tInt = t2 + seconds(transferTime);
+
+timespan = transferTime; % span of time to integrate over [s]
 
 % Sun Inits: Initialize with no velocity, act as zero velocity reference
 % x, y, z initial coordinates of sun:
@@ -47,18 +57,20 @@ sunMu = 1.3271e11;
 sunMass = 1.989e30;
 
 % Earth Inits, pulled from J2000 on Nov 15, 2024:
-t1 = datetime('2024-November-15')
+t1Earth = datetime('2024-November-15')
 
-t2 = datetime('2025-March-12')
+% use the starting mean longitude to find the location at the start date:
+earthMeanLong0 = 100.46435; 
+earthPeriod = 365.256 * days2s;
+earthMeanMotion = 2*pi / earthPeriod;
 
-timeDiff = between(t1,t2)
+earthMeanLong = meanLongSolver(t1Earth, t2, earthMeanMotion, earthMeanLong0)
 
 earthA = 1 * AU2km;     % semi major axis
 earthE = 0.0167;        % eccentricity
 earthI = 0.00005;       % inclination
 earthRAAN = -11.26064;  % longitude of ascending node [deg]
 earthAOP = 102.94719;   % argument of periapsis [deg]
-earthMeanLong = 100.46435;
 earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
 earthMass = 5.9722e24;  % mass of Earth [kg]
 
@@ -66,15 +78,46 @@ earthMass = 5.9722e24;  % mass of Earth [kg]
 [earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0);
 
 % Venus Inits, pulled from J2000 on Jan 11, 2024:
+t1Venus = datetime('2024-January-11');
+venusMeanLong0 = 181.97973;
+venusPeriod = 224.7 * days2s;
+venusMeanMotion = 2*pi / venusPeriod;
+
+venusMeanLong = meanLongSolver(t1Venus, t2, venusMeanMotion, venusMeanLong0)
+venusMeanLongIntercept = meanLongSolver(t1Venus, tInt, venusMeanMotion, venusMeanLong0)
+
 venusA = 0.723 * AU2km; % semi major axis
 venusE = 0.00677;       % eccentricity
 venusI = 3.39471;       % inclination
 venusRAAN = 76.68069;   % longitude of ascending node [deg]
 venusAOP = 131.53298;   % argument of periapsis [deg]
-venusMeanLong = 181.97973;
 venusMu = 3.248e5;  % gravitational constant 
 % calculate the cartesian state for the given inputs:
 [venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos, 0);
+
+endTime = timespan / dt;
+
+%prealloc arrays for speed:
+
+sunPosArray = zeros(timespan / dt, 3);
+earthPosArray = zeros(timespan / dt, 3);
+earthVelArray = zeros(timespan / dt, 3);
+venusPosArray = zeros(timespan / dt, 3);
+satPosArray = zeros(timespan / dt, 3);
+satVelArray = zeros(timespan / dt, 3);
+tArray = zeros(timespan/dt , 1);
+
+for i = 1:endTime
+    t = dt * i;
+    %venus rk4 method:
+    rVenus = sunPos - venusPos;
+    % rk4 integrate:
+    venusVel = rk4(@(t,y)accel(t,venusVel,rVenus, sunMu), dt, t, venusVel);
+    venusPos = rk4(@(t,y)vel(t,venusVel), dt, t, venusPos);
+    venusPosArray(i,:) = venusPos;
+end
+
+venusPosIntercept = venusPosArray(end,:)
 
 % Satellite Inits:
 % satA = 6600;     % semi major axis
@@ -90,27 +133,21 @@ venusMu = 3.248e5;  % gravitational constant
 % burn1StartTime = 0; % start time of burn [s]
 % dV1 = 3.276;         % change in velocity of burn [km/s]
 
-satPos = earthPos + 500;
-satVel =  [-23.2185 3.3620 1.2853]
 
-%prealloc arrays for speed:
+[v0, vF] = lambertProblem(earthPos, venusPosIntercept, transferTime, 1, sunMu, 1e-6, 500, 0, 4*pi^2, -4*pi)
 
-sunPosArray = zeros(timespan / dt, 3);
-earthPosArray = zeros(timespan / dt, 3);
-earthVelArray = zeros(timespan / dt, 3);
-venusPosArray = zeros(timespan / dt, 3);
-satPosArray = zeros(timespan / dt, 3);
-satVelArray = zeros(timespan / dt, 3);
+satPos = earthPos;
+satVel =  v0;
+
+
 
 %% Main simulation loop:
-
-endTime = timespan / dt;
 
 for i = 1:endTime
     t = dt * i;
     tArray(i) = t;
 
-    % Planet Euler Method:
+    % Sun Euler Method:
     sunPos = sunPos + sunVel * dt;
     sunPosArray(i,:) = sunPos;
 
@@ -127,15 +164,17 @@ for i = 1:endTime
     % rk4 integrate:
     venusVel = rk4(@(t,y)accel(t,venusVel,rVenus, sunMu), dt, t, venusVel);
     venusPos = rk4(@(t,y)vel(t,venusVel), dt, t, venusPos);
-    venusPosArray(i,:) = venusPos;
+    %venusPosArray(i,:) = venusPos;
 
     %sat rk4 method:
     rSatEarth = earthPos - satPos;
     rSatVenus = venusPos - satPos;
     rSatSun = sunPos - satPos;
     % define vectors for multibody dynamics:
-    rList = [rSatEarth, rSatVenus, rSatSun];
-    muList = [earthMu, venusMu, sunMu];
+    % rList = [rSatEarth, rSatVenus, rSatSun];
+    % muList = [earthMu, venusMu, sunMu];
+    rList = [rSatVenus, rSatSun];
+    muList = [venusMu, sunMu];
     % rk4 integrate:
     satVel = rk4(@(t,y)accel(t,satVel,rList, muList), dt, t, satVel);
 
@@ -157,7 +196,7 @@ end
 
 
 % Energy of System
-if plotnum3 == 1
+if plotnum1 == 1
     % find the kinetic energy, 1/2 m v^2
     earthKE = 1/2 * vecnorm(earthVelArray * 1000, 2, 2).^2 * earthMass;
     % find the potential energy, mg
@@ -171,7 +210,7 @@ if plotnum3 == 1
     energy = (earthKE - earthPE);
 
     
-    plot(tArray / s2yr, energy / 1e9, 'LineWidth', 2)
+    plot(tArray / yr2s, energy / 1e9, 'LineWidth', 2)
 
     title("Total Mechanical Energy for Earth")
     xlabel("Time [yrs]")
@@ -249,7 +288,7 @@ end
 
 % Trajectory figure 2
 
-if plotnum2 == 1
+if plotnum3 == 1
 
     hfig = figure;  % save the figure handle in a variable
     fname = 'Sat Earth Plot';
@@ -285,38 +324,39 @@ if plotnum2 == 1
     print(hfig,fname,'-dpng','-r300')
 
 
-    xl = xlim;
-    yl = ylim;
-    zl = zlim;
     
     %axis equal
 end
 
 % Trajectory Animation:
-if plotnum1 == 1
-    figure(1)
-    %curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
+if plotnum4 == 1
+    figure(3)
+    curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
     curve1 = animatedline('LineWidth', 1, 'Color','#f97306');
     curve2 = animatedline('LineWidth', 1.5, 'Color', '#3b3b3b');
     xlabel('Displacement-X')
     ylabel('Displacement-Y')
     zlabel('Displacement-Z')
-    legend('Planet','Satellite', 'Moon')
+    legend('Venus','Earth', 'Sat')
     axis equal
     view(43,24);
     
     output = 0;
-    playbackSpeed = 2;
-    % 
-    % xlim(xl);
-    % ylim(yl);
-    % zlim(zl);
+    playbackSpeed = 100;
+
+    xlim(xl);
+    ylim(yl);
+    zlim(zl);
+
+
 
     for i=1:endTime
-        %addpoints(curve, sunPosArray(i,1), sunPosArray(i,2), sunPosArray(i,3));
-        addpoints(curve1,earthPosArray(i,1), earthPosArray(i,2), earthPosArray(i,3));
-        addpoints(curve2,satPosArray(i,1), satPosArray(i,2), satPosArray(i,3));
-        title(sprintf("Satellite Trajectory at time %.2f days", tArray(i) / (3600 * 24)));
+        index = playbackSpeed * i;
+
+        addpoints(curve, venusPosArray(index,1), venusPosArray(index,2), venusPosArray(index,3));
+        addpoints(curve1,earthPosArray(index,1), earthPosArray(index,2), earthPosArray(index,3));
+        addpoints(curve2,satPosArray(index,1), satPosArray(index,2), satPosArray(index,3));
+        title(sprintf("Satellite Trajectory at time %.2f days", tArray(i) / (3600 * 24) * playbackSpeed));
         drawnow;
         %pause(dt / playbackSpeed);
         grid on;
@@ -333,139 +373,3 @@ if plotnum1 == 1
         end
     end
 end
-
-
-
-
-
-
-%% FUNCTIONS:
-
-%% RK4 Integrator
-% numerically integrates a first order initial value problem
-% inputs:
-% fun - function of integration
-% dt - time step [s]
-% tIn - input time [s]
-% xIn - initial value input vector
-% outputs:
-% out - final value output vector
-function out = rk4(fun, dt, tIn, xIn)
-    f1 = fun(tIn,xIn);
-    f2 = fun(tIn + dt/2, xIn + (dt/2) .* f1);
-    f3 = fun(tIn + dt/2, xIn + (dt/2) .* f2);
-    f4 = fun(tIn + dt, xIn + dt*f3);
-    
-    out = xIn + (dt / 6)*(f1 + 2*f2 + 2*f3+f4);
-end
-   
-%% Acceleration Function
-% function describing the translational accelerations on the satellite
-% inputs:
-% t- input time [s]
-% v - current velocity [-/s]
-% r - distance from bodies
-% burnStart - start time of burn [s]
-% burnDuration - duration of burn [s]
-% dV - total delta V of the burn [-/s]
-% mu - gravitational constant of bodies (must be in same order as r)
-% burn - 0 => no burn compute, 1 => burn compute
-% outputs:
-% dv - acceleration vector for integration
-function dv = accel(t, v, r, mu)
-    % gravity forces:
-    gravAccel = 0;
-    for i = 1:length(mu)
-        r0 = (i - 1) * 3 + 1;
-        rf =  i * 3;
-        gravAccel = gravAccel + (mu(i) / (norm(r(r0:rf))^2) * (r(r0:rf) / norm(r(r0:rf))));
-    end
-    
-    dv = gravAccel;
-end
-
-%% Velocity Function
-% function describing the position-velocity on the satellite
-% inputs:
-% t- input time [s]
-% v - current velocity [-/s]
-% outputs:
-% dr - velocity vector for integration
-function dr = vel(t, v)
-dr = v;
-end
-
-%% Orbital Elements Function
-% function converting orbital elements to initial cartesian states
-% inputs:
-% a - semi major axis
-% e - eccentricity
-% i - inclination (relative to x-y plane)
-% laan - longitude of ascending node [deg]
-% aop - argument of periapsis [deg]
-% mu - gravitational constant of parent body
-% posInit - initial position of parent body 
-% outputs:
-% pos - initial position vector
-% vel - initial velocity vector
-function [pos, vel] = orbitalElements(a, e, i, raan, lop, meanLong, mu, posInit, velInit)
-
-% convert inputs to radians:
-raan = deg2rad(raan);
-i = deg2rad(i);
-lop = deg2rad(lop);
-meanLong = deg2rad(meanLong);
-
-aop = lop - raan;
-
-meanAnomoly = meanLong - raan - aop;
-
-% find the rotation matrix wrt to the planet centered frame:
-vecRotMat = eul2rotm([raan,i,aop], 'ZXZ');
-
-vecRotMat = eul2rotm([raan, i, aop + meanAnomoly], 'ZXZ');
-
-% find the vector pointing towards the periapsis
-vec = vecRotMat * [1;0;0];
-
-% find the length of the periapsis from orbital elements:
-periapsis = a * (1 - e);
-
-r = a * (1 - e^2) / (1 + e * cos(meanAnomoly));
-
-% find the initial position (add parent body origin to get absolute origin)
-pos = vec.' * periapsis + posInit;
-
-pos = vec.' * r + posInit;
-
-% get velocity from vis-viva
-velMag = sqrt(mu * ((2/periapsis) - (1 / a)));
-
-velMag = sqrt(mu * ((2/r) - (1 / a)));
-
-% find the velocity vector:
-% find another vector 90 degrees along orbit plane:
-vector2RotMat = eul2rotm([raan,i,aop + pi/2], 'ZXZ');
-vec2 = vector2RotMat * [1;0;0];
-
-% find orbit normal (z-axis of orbit):
-orbitNorm = cross(vec2, vec) / norm(cross(vec2, vec));
-
-% find orbit velocity direction w/ cross product:
-velDir = cross(orbitNorm, vec) / norm(cross(orbitNorm, vec));
-vel = (velMag * velDir).' + velInit;
-end
-
-%% Transfer Calculation Function
-% function to find the tranfer orbits
-% inputs:
-% a - semi major axis
-% e - eccentricity
-% i - inclination (relative to x-y plane)
-% laan - longitude of ascending node [deg]
-% aop - argument of periapsis [deg]
-% mu - gravitational constant of parent body
-% posInit - initial position of parent body 
-% outputs:
-% pos - initial position vector
-% vel - initial velocity vector
