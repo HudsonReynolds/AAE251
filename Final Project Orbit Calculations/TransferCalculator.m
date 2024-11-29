@@ -1,4 +1,4 @@
-function [dVtot, dV1, dV2] = AAE251_Transfer_Calculator(tStart, transferTime, tm, orbitPlot)
+function [dVtot, dV1, dV2] = TransferCalculator(tStart, transferTime, tm, orbitPlot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Title: Transfer Orbit Calculations
@@ -32,14 +32,19 @@ function [dVtot, dV1, dV2] = AAE251_Transfer_Calculator(tStart, transferTime, tm
 plotnum1 = 0;
 plotnum2 = orbitPlot;
 plotnum3 = 0;
-plotnum4 = 0;
+plotnum4 = 1;
 
-% conversions
+
+% conversions and constants
 
 AU2km = 1.496e8; % 1 AU in kilometers
 yr2s = 3.1536e7; % number of seconds in year
 G = 6.6743e-11;  % gravitational constant
 days2s = 86400;  % number of seconds in a day
+earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
+earthR = 6378;
+venusMu = 3.248e5;  % gravitational constant 
+venusR = 6052;
 
 % simulation time parameters
 time = 0;      % simulation starting time [s]
@@ -62,9 +67,9 @@ sunMass = 1.989e30;
 
 
 % calculate the cartesian state for the given inputs:
-[earthPos, earthVel] = planetEphemeris(juliandate(t2), 'Sun', 'Earth');
+[earthPos, earthVel] = planetEphemeris(juliandate(tStart), 'Sun', 'Earth');
 
-[venusPosIntercept, venusVelIntercept] = planetEphemeris(juliandate(t2) + transferTime / days2s, 'Sun', 'Venus');
+[venusPosIntercept, venusVelIntercept] = planetEphemeris(juliandate(tStart) + transferTime/days2s, 'Sun', 'Venus');
 
 
 % solve the lambert problem for the orbit of the satellite
@@ -72,6 +77,25 @@ sunMass = 1.989e30;
 
 satPos = earthPos;
 satVel =  v0;
+
+v0diff = norm(v0 - earthVel);
+
+c3 = v0diff^2;
+
+dVLEO = sqrt(earthMu / (earthR+200));
+
+dV1 = sqrt(c3 + (2 * earthMu / (earthR+200))) - dVLEO;
+
+vFdiff = norm(vF - venusVelIntercept);
+
+c2 = vFdiff^2;
+
+dVLVO = sqrt(venusMu/(venusR + 500));
+
+dV2 = sqrt(c2 + 2 * venusMu / (venusR + 500)) - dVLVO;
+
+dVtot = dV1 + dV2;
+
 
 %% Main simulation loop:
 
@@ -85,7 +109,7 @@ earthMeanLong0 = 100.46435;
 earthPeriod = 365.256 * days2s;
 earthMeanMotion = 2*pi / earthPeriod;
 
-earthMeanLong = meanLongSolver(t1Earth, t2, earthMeanMotion, earthMeanLong0);
+earthMeanLong = meanLongSolver(t1Earth, tStart, earthMeanMotion, earthMeanLong0);
 
 earthA = 1 * AU2km;     % semi major axis
 earthE = 0.0167;        % eccentricity
@@ -95,7 +119,7 @@ earthAOP = 102.94719;   % argument of periapsis [deg]
 earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
 earthMass = 5.9722e24;  % mass of Earth [kg]
 [earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0);
-[earthPos, earthVel] = planetEphemeris(juliandate(t2), 'Sun', 'Earth');
+[earthPos, earthVel] = planetEphemeris(juliandate(tStart), 'Sun', 'Earth');
 
 
 
@@ -105,7 +129,7 @@ venusMeanLong0 = 181.97973;
 venusPeriod = 224.7 * days2s;
 venusMeanMotion = 2*pi / venusPeriod;
 
-venusMeanLong = meanLongSolver(t1Venus, t2, venusMeanMotion, venusMeanLong0);
+venusMeanLong = meanLongSolver(t1Venus, tStart, venusMeanMotion, venusMeanLong0);
 venusMeanLongIntercept = meanLongSolver(t1Venus, tInt, venusMeanMotion, venusMeanLong0);
 
 venusA = 0.723 * AU2km; % semi major axis
@@ -116,7 +140,7 @@ venusAOP = 131.53298;   % argument of periapsis [deg]
 venusMu = 3.248e5;  % gravitational constant 
 % calculate the cartesian state for the given inputs:
 [venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos, 0);
-[venusPos, venusVel] = planetEphemeris(juliandate(t2), 'Sun', 'Venus');
+[venusPos, venusVel] = planetEphemeris(juliandate(tStart), 'Sun', 'Venus');
 
 
 %prealloc arrays for speed:
@@ -319,7 +343,7 @@ end
 
 % Trajectory Animation:
 if plotnum4 == 1
-    figure(3)
+    figure(5)
     curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
     curve1 = animatedline('LineWidth', 1, 'Color','#f97306');
     curve2 = animatedline('LineWidth', 1.5, 'Color', '#3b3b3b');
@@ -331,7 +355,7 @@ if plotnum4 == 1
     view(43,24);
     
     output = 0;
-    playbackSpeed = 100;
+    playbackSpeed = 10;
 
     xlim(xl);
     ylim(yl);

@@ -1,6 +1,9 @@
 %% Orbital Elements Function
+% Author: Hudson Reynolds, Last Modified: 11/28/2024
+%
 % function converting orbital elements to initial cartesian states
-% inputs:
+%
+% Inputs:
 % a - semi major axis
 % e - eccentricity
 % i - inclination (relative to x-y plane)
@@ -8,7 +11,8 @@
 % aop - argument of periapsis [deg]
 % mu - gravitational constant of parent body
 % posInit - initial position of parent body 
-% outputs:
+%
+% Outputs:
 % pos - initial position vector
 % vel - initial velocity vector
 function [pos, vel] = orbitalElements(a, e, i, raan, lop, meanLong, mu, posInit, velInit)

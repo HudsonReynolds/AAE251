@@ -1,5 +1,7 @@
 function [v0, vF] = lambertProblem(r0, rF, dT, tm, mu, tolerance, maxSteps, psi, psi_ub, psi_lb)
 %% Lambert Problem Function
+% Author: Hudson Reynolds. Last Modified: 11/28/2024
+%
 % function to solve the boundary value problem associated with finding the
 % orbit between two points over a given time interval
 %
@@ -14,7 +16,8 @@ function [v0, vF] = lambertProblem(r0, rF, dT, tm, mu, tolerance, maxSteps, psi,
 % psi - initial guess for the deltaT
 % psi_ub - upper bound for the deltaT
 % psi_lb - lower bound for the deltaT
-% outputs:
+%
+% Outputs:
 % v0 - initial velocity vector
 % vF - final velocity vector
 
@@ -40,7 +43,10 @@ function [v0, vF] = lambertProblem(r0, rF, dT, tm, mu, tolerance, maxSteps, psi,
     end
 
     % make initial guesses for the c2 and c3 values
+
+    %c2, the excess velocity upon capture, squared
     c2 = 0.5;
+    %c3, the speed above escape velocity, squared
     c3 = 1/6;
 
     % iterate through values under convergance is achieved

@@ -1,3 +1,4 @@
+function [dVtot, dV1, dV2] = TransferCalculator(tStart, transferTime, tm, orbitPlot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Title: Transfer Orbit Calculations
@@ -11,21 +12,27 @@
 % 6DoF dynamics and N-body physics. The orbits of Venus, Earth, and the
 % satellite are simulated.
 % 
+% Inputs:
+% t1- starting time at the epoch [date]
+% transferTime - time to transfer [days]
+% tm - short or long transfer (1, -1)
+% L0 - mean longitude at the epoch [deg]
+% orbitPlot - turn plotting on/off (1, 0)
 %
+% Outputs:
+% dVtot - total deltaV for transfer
+% dV1 - delta V from LEO to first transfer
+% dV2 - delta V to capture at planet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Initialization:
-% clear console and figures
-clear;
-clc;
-close all;
 
 % turn plots on and off
 
 plotnum1 = 0;
-plotnum2 = 1;
+plotnum2 = orbitPlot;
 plotnum3 = 0;
-plotnum4 = 1;
+plotnum4 = 0;
 
 % conversions
 
@@ -34,17 +41,15 @@ yr2s = 3.1536e7; % number of seconds in year
 G = 6.6743e-11;  % gravitational constant
 days2s = 86400;  % number of seconds in a day
 
-
 % simulation time parameters
 time = 0;      % simulation starting time [s]
-dt = 600;      % time step [s]
+dt = 3600;      % time step [s]
 
-transferTime = 147 * days2s; % amount of time for the transfer
+transferTime = transferTime * days2s; % amount of time for the transfer
 
-t2 = datetime('2025-March-12'); % date at which the simulation starts
+tInt = tStart + seconds(transferTime); % transfer time
 
-
-timespan = transferTime + 100 * days2s; % span of time to integrate over [s]
+timespan = transferTime; % span of time to integrate over [s]
 
 % Sun Inits: Initialize with no velocity, act as zero velocity reference
 % x, y, z initial coordinates of sun:
@@ -55,15 +60,32 @@ sunVel = [0,0,0];
 sunMu = 1.3271e11;
 sunMass = 1.989e30;
 
+
+% calculate the cartesian state for the given inputs:
+[earthPos, earthVel] = planetEphemeris(juliandate(tStart), 'Sun', 'Earth');
+
+[venusPosIntercept, venusVelIntercept] = planetEphemeris(juliandate(tStart) + transferTime/days2s, 'Sun', 'Venus');
+
+
+% solve the lambert problem for the orbit of the satellite
+[v0, vF] = lambertProblem(earthPos, venusPosIntercept, transferTime, tm, sunMu, 1e-6, 500, 0, 4*pi^2, -4*pi);
+
+satPos = earthPos;
+satVel =  v0;
+
+%% Main simulation loop:
+
+if orbitPlot == 1
+
 % Earth Inits, pulled from J2000 on Nov 15, 2024:
-t1Earth = datetime('2024-November-15')
+t1Earth = datetime('2024-November-15');
 
 % use the starting mean longitude to find the location at the start date:
 earthMeanLong0 = 100.46435; 
 earthPeriod = 365.256 * days2s;
 earthMeanMotion = 2*pi / earthPeriod;
 
-earthMeanLong = meanLongSolver(t1Earth, t2, earthMeanMotion, earthMeanLong0)
+earthMeanLong = meanLongSolver(t1Earth, t2, earthMeanMotion, earthMeanLong0);
 
 earthA = 1 * AU2km;     % semi major axis
 earthE = 0.0167;        % eccentricity
@@ -72,9 +94,10 @@ earthRAAN = -11.26064;  % longitude of ascending node [deg]
 earthAOP = 102.94719;   % argument of periapsis [deg]
 earthMu = 3.986e5;      % gravitational constant [km^3/s^2]
 earthMass = 5.9722e24;  % mass of Earth [kg]
-
-% calculate the cartesian state for the given inputs:
 [earthPos, earthVel] = orbitalElements(earthA, earthE, earthI, earthRAAN, earthAOP, earthMeanLong, sunMu, sunPos, 0);
+[earthPos, earthVel] = planetEphemeris(juliandate(t2), 'Sun', 'Earth');
+
+
 
 % Venus Inits, pulled from J2000 on Jan 11, 2024:
 t1Venus = datetime('2024-January-11');
@@ -82,7 +105,8 @@ venusMeanLong0 = 181.97973;
 venusPeriod = 224.7 * days2s;
 venusMeanMotion = 2*pi / venusPeriod;
 
-venusMeanLong = meanLongSolver(t1Venus, t2, venusMeanMotion, venusMeanLong0)
+venusMeanLong = meanLongSolver(t1Venus, t2, venusMeanMotion, venusMeanLong0);
+venusMeanLongIntercept = meanLongSolver(t1Venus, tInt, venusMeanMotion, venusMeanLong0);
 
 venusA = 0.723 * AU2km; % semi major axis
 venusE = 0.00677;       % eccentricity
@@ -92,26 +116,8 @@ venusAOP = 131.53298;   % argument of periapsis [deg]
 venusMu = 3.248e5;  % gravitational constant 
 % calculate the cartesian state for the given inputs:
 [venusPos, venusVel] = orbitalElements(venusA, venusE, venusI, venusRAAN, venusAOP, venusMeanLong, sunMu, sunPos, 0);
+[venusPos, venusVel] = planetEphemeris(juliandate(t2), 'Sun', 'Venus');
 
-% Satellite Inits:
-% satA = 6600;     % semi major axis
-% satE = 0;    % eccentricity
-% satI = 28;     % inclination
-% satRAAN = 30;  % longitude of ascending node [deg]
-% satAOP = 90;   % argument of periapsis [deg]
-% satMeanLong = 10;
-% % calculate the cartesian state for the given inputs:
-% [satPos, satVel] = orbitalElements(satA, satE, satI, satRAAN, satAOP, satMeanLong, earthMu, earthPos, earthVel);
-% 
-% % manuver inits:
-% burn1StartTime = 0; % start time of burn [s]
-% dV1 = 3.276;         % change in velocity of burn [km/s]
-
-
-[v0, vF] = lambertProblem(earthPos, venusPos, transferTime, 1, sunMu, 1e-6, 500, 0, 4*pi^2, -4*pi)
-
-satPos = earthPos + 5000;
-satVel =  v0;
 
 %prealloc arrays for speed:
 
@@ -121,16 +127,16 @@ earthVelArray = zeros(timespan / dt, 3);
 venusPosArray = zeros(timespan / dt, 3);
 satPosArray = zeros(timespan / dt, 3);
 satVelArray = zeros(timespan / dt, 3);
-
-%% Main simulation loop:
+tArray = zeros(timespan/dt , 1);
 
 endTime = timespan / dt;
+
 
 for i = 1:endTime
     t = dt * i;
     tArray(i) = t;
 
-    % Planet Euler Method:
+    % Sun Euler Method:
     sunPos = sunPos + sunVel * dt;
     sunPosArray(i,:) = sunPos;
 
@@ -154,8 +160,10 @@ for i = 1:endTime
     rSatVenus = venusPos - satPos;
     rSatSun = sunPos - satPos;
     % define vectors for multibody dynamics:
-    rList = [rSatEarth, rSatVenus, rSatSun];
-    muList = [earthMu, venusMu, sunMu];
+    % rList = [rSatEarth, rSatVenus, rSatSun];
+    % muList = [earthMu, venusMu, sunMu];
+    rList = [rSatVenus, rSatSun];
+    muList = [venusMu, sunMu];
     % rk4 integrate:
     satVel = rk4(@(t,y)accel(t,satVel,rList, muList), dt, t, satVel);
 
@@ -233,9 +241,9 @@ if plotnum2 == 1
 
     plot3(sunPosArray(:,1), sunPosArray(:,2), sunPosArray(:,3), '.', 'MarkerSize', 20, 'Color', '#FFA500')
     hold on
-    plot3(satPosArray(:,1), satPosArray(:,2), satPosArray(:,3), 'LineWidth', 1, 'Color','#f97306')
-    plot3(earthPosArray(:,1), earthPosArray(:,2), earthPosArray(:,3), 'LineWidth', 1.5, 'Color', '#3b3b3b')
-    plot3(venusPosArray(:,1), venusPosArray(:,2), venusPosArray(:,3), 'LineWidth', 1.5, 'Color', 'red')
+    plot3(satPosArray(:,1), satPosArray(:,2), satPosArray(:,3), 'LineWidth', 1.5, 'Color','r')
+    plot3(earthPosArray(:,1), earthPosArray(:,2), earthPosArray(:,3), 'LineWidth', 1.5, 'Color', '#00A693')
+    plot3(venusPosArray(:,1), venusPosArray(:,2), venusPosArray(:,3), 'LineWidth', 1.5, 'Color', '#b5651d')
     %plot3(satPosArray(burnIndex,1), satPosArray(burnIndex,2), satPosArray(burnIndex, 3), 'r*')
     title('Earth-Venus-Sun 3D')
     xlabel('Displacement-X')
@@ -329,12 +337,14 @@ if plotnum4 == 1
     ylim(yl);
     zlim(zl);
 
-    index = playbackSpeed * i
+
 
     for i=1:endTime
-        addpoints(curve, venusPosArray(index,1), venusPosArray(index,2), venusPosArray(playbackSpeed*i,3));
+        index = playbackSpeed * i;
+
+        addpoints(curve, venusPosArray(index,1), venusPosArray(index,2), venusPosArray(index,3));
         addpoints(curve1,earthPosArray(index,1), earthPosArray(index,2), earthPosArray(index,3));
-        addpoints(curve2,satPosArray(playbackSpeed*i,1), satPosArray(playbackSpeed*i,2), satPosArray(playbackSpeed*i,3));
+        addpoints(curve2,satPosArray(index,1), satPosArray(index,2), satPosArray(index,3));
         title(sprintf("Satellite Trajectory at time %.2f days", tArray(i) / (3600 * 24) * playbackSpeed));
         drawnow;
         %pause(dt / playbackSpeed);
@@ -351,4 +361,6 @@ if plotnum4 == 1
             end
         end
     end
+end
+end
 end
