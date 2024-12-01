@@ -1,0 +1,104 @@
+%AAE 251 Fall 2024
+%ISA 5
+%AAE251_ISA5_Q1
+%Author: Hudson Reynolds
+
+% Initializations:
+
+% conversions and constants:
+ft2m = 0.3048;
+g = 9.81;
+
+%variables for aircraft:
+mI = 8500;                        % maximum takeoff mass [kg]
+mF = 5000;                        %dry mass [kg]
+mFuel = 2750;                     % max fuel mass [kg]
+crewNum = 2;                      % number of crew
+crewMass = 75;                    % mass of crew member [kg]
+passNum = 18;                     % max passenger number 
+passMass = 80;                    % passenger weight [kg]
+bagMass = 20;                     % mass of passenger bag [kg]
+cT = 0.58;                        % specific fuel consumtion [lb of fuel / lb thrust-hr]
+cT = cT / 3600;                   % convert to 1/s
+S = 33.29;                        % wing area of the aircraft [m^2]
+V = 201;                          % velocity of flight [m/s]
+alt = 35000;                      %altitude [ft]
+AR = 7.8;                         % aspect ratio of wing
+e = 0.81;                         % oswold efficiency
+cD0 = 0.03;                       % zero-lift drag coefficient
+k = 1 / (pi * e * AR);            % induced drag coeff.
+[~,~,~,rho] = atmosisa(alt*ft2m); % air density [kg/m^3]
+
+% fuel fractions:
+W1W0 = 0.995; % fuel fraction for aircraft start
+W2W1 = 0.980; % fuel fraction for climb
+W4W3 = 0.990; % fuel fraction for descent
+W5W4 = 0.987; % fuel fraction for loiter
+W6W5 = 0.992; % fuel fraction for landing
+
+
+% part A calcs:
+
+mFuelA = mI - crewMass * crewNum - (passMass+bagMass)*passNum - mF;
+
+cruiseStartMass = mI * W1W0 * W2W1;
+
+W3W2 = (1 - (mFuelA / mI)) / (W1W0*W2W1*W4W3*W5W4*W6W5);
+
+cruiseEndMass = mI * W1W0 * W2W1 * W3W2;
+
+cruiseMassAvg = mean([cruiseStartMass, cruiseEndMass]);
+
+cL = 2 * cruiseMassAvg * g / (rho * S * V^2);
+
+cD = cD0 + k * cL^2;
+
+L_D = cL/cD;
+
+range = (-L_D * V * log(W3W2) / cT);
+
+mPay = mI - crewMass * crewNum - mFuelA - mF;
+
+fprintf("Range is %.2f km and payload is %.2f kg\n", range/1e3, mPay)
+
+
+% part B calcs
+
+mFuelB = mFuel;
+
+cruiseStartMass = mI * W1W0 * W2W1;
+
+W3W2 = (1 - (mFuelB / mI)) / (W1W0*W2W1*W4W3*W5W4*W6W5);
+
+cruiseEndMass = mI * W1W0 * W2W1 * W3W2;
+
+cruiseMassAvg = mean([cruiseStartMass, cruiseEndMass]);
+
+cL = 2 * cruiseMassAvg * g / (rho * S * V^2);
+
+cD = cD0 + k * cL^2;
+
+L_D = cL/cD;
+
+range = (-L_D * V * log(W3W2) / cT);
+
+mPay = mI - crewMass * crewNum - mFuel - mF;
+
+maxPass = floor(mPay / passMass);
+
+luggageMass = (mPay - (maxPass * passMass)) / maxPass;
+
+fprintf("Range is %.2f km and payload is %.2f kg\n", range/1e3, mPay)
+fprintf("At point B, %d passengers with %.2f kg of luggage are allowed.\n", maxPass, luggageMass)
+
+% part C calcs:
+
+
+
+
+
+
+
+
+
+

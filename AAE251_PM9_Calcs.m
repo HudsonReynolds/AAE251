@@ -1,7 +1,7 @@
 %mass for each launch configuration:
-payload = [22800, 63800, 16800, 27200, 21000, 95000];
+payload = [22800, 63800, 16800, 27200, 21000, 95000, 22800];
 
-launchVehicle = ["Falcon 9 LEO", "Falcon Heavy", "Falcon Heavy Venus Transfer", "Vulcan Centaur", "Ariane 5", "SLS"];
+launchVehicle = ["Falcon 9 LEO", "Falcon Heavy", "Falcon Heavy Venus Transfer", "Vulcan Centaur", "Ariane 5", "SLS", "Falcon 9"];
 
 
 for i = 1:length(payload)
@@ -19,8 +19,8 @@ for i = 1:length(payload)
     % define constants
     fInert1 = 0.24;
     fInert2 = 0.1448;
-    dV1 = 3506 * residuals;
-    dV2 = 3279 * residuals;    
+    dV1 = 3883 * residuals;
+    dV2 = 3356 * residuals;    
     C1 = 453 * 9.81;    
     C2 = 316 * 9.81;    
     MR1 = exp(dV1/C1);    
@@ -34,7 +34,7 @@ for i = 1:length(payload)
 
         while mI2 < capacity
     
-            mPay = mPay + mDiff / 20 + .001;
+            mPay = mPay + mDiff / 25 + .001;
 
             % stage 2:
             
@@ -61,7 +61,7 @@ for i = 1:length(payload)
 
         while mI1 < capacity
 
-            mPay = mPay + mDiff / 20;
+            mPay = mPay + mDiff / 30;
 
             % stage 2:
             
@@ -97,3 +97,11 @@ for i = 1:length(payload)
     fprintf("Final Payload Mass for %s is %.2f and Initial Mass is %.2f. Payload limit is %.2f\n",launchVehicle(i), mPay, mI1, capacity)
 
 end
+
+totalMass = mI1
+
+fuelMassfrac = mProp1 / totalMass * 100
+
+dryMassfrac = mInert1 / totalMass * 100
+
+engineMassfrac = 188 / totalMass * 100
