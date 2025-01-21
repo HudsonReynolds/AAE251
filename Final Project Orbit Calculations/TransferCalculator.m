@@ -29,7 +29,7 @@ function [dVtot, dV1, dV2] = TransferCalculator(tStart, transferTime, tm, orbitP
 
 % turn plots on and off
 
-plotnum1 = 0;
+plotnum1 = 1;
 plotnum2 = orbitPlot;
 plotnum3 = 0;
 plotnum4 = 1;
@@ -231,7 +231,7 @@ if plotnum1 == 1
     
     
     picturewidth = 20; % set the width of image in cm
-    hw_ratio = .6; % aspect ratio
+    hw_ratio = 0.5625; % aspect ratio
     set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
     
     grid on
@@ -343,9 +343,16 @@ end
 
 % Trajectory Animation:
 if plotnum4 == 1
-    figure(5)
+
+    hfig = figure;  % save the figure handle in a variable
+    fname = 'Sat Earth Animation';
+    
+    picturewidth = 20; % set the width of image in cm
+    hw_ratio = 0.5625; % aspect ratio
+    set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
+
     curve = animatedline('LineWidth', 1.5, 'Color','#069af3');
-    curve1 = animatedline('LineWidth', 1, 'Color','#f97306');
+    curve1 = animatedline('LineWidth', 1.5, 'Color','#f97306');
     curve2 = animatedline('LineWidth', 1.5, 'Color', '#3b3b3b');
     xlabel('Displacement-X')
     ylabel('Displacement-Y')
@@ -353,8 +360,13 @@ if plotnum4 == 1
     legend('Venus','Earth', 'Sat')
     axis equal
     view(43,24);
+
+    set(findall(hfig,'-property','Box'),'Box','off') % turn off box
+    set(findall(hfig,'-property','Interpreter'),'Interpreter','latex') 
+    set(findall(hfig,'-property','TickLabelInterpreter'),'TickLabelInterpreter','latex')
     
-    output = 0;
+    
+    output = 1;
     playbackSpeed = 10;
 
     xlim(xl);
@@ -362,8 +374,7 @@ if plotnum4 == 1
     zlim(zl);
 
 
-
-    for i=1:endTime
+    for i= (1:endTime / playbackSpeed)
         index = playbackSpeed * i;
 
         addpoints(curve, venusPosArray(index,1), venusPosArray(index,2), venusPosArray(index,3));
@@ -379,9 +390,9 @@ if plotnum4 == 1
             img =  frame2im(frame);
             [img,cmap] = rgb2ind(img,256);
             if i == 1
-                imwrite(img,cmap,'TrajAnimation.gif','gif','LoopCount',Inf,'DelayTime',dt/playbackSpeed);
+                imwrite(img,cmap,'TrajAnimation.gif','gif','LoopCount',Inf,'DelayTime',1/24);
             else
-                imwrite(img,cmap,'TrajAnimation.gif','gif','WriteMode','append','DelayTime',dt/playbackSpeed);
+                imwrite(img,cmap,'TrajAnimation.gif','gif','WriteMode','append','DelayTime',1/24);
             end
         end
     end

@@ -284,7 +284,7 @@ if plotnum3 == 1
 
 
     picturewidth = 20; % set the width of image in cm
-    hw_ratio = .6; % aspect ratio
+    hw_ratio = 0.5625; % aspect ratio
     set(findall(hfig,'-property','FontSize'),'FontSize',16) % adjust font size
     plot3(earthPosArray(:,1), earthPosArray(:,2), earthPosArray(:,3), 'LineWidth', 1.5, 'Color', '#3b3b3b')
     hold on
@@ -330,7 +330,7 @@ if plotnum4 == 1
     axis equal
     view(43,24);
     
-    output = 0;
+    output = 1;
     playbackSpeed = 100;
 
     xlim(xl);
@@ -347,7 +347,6 @@ if plotnum4 == 1
         addpoints(curve2,satPosArray(index,1), satPosArray(index,2), satPosArray(index,3));
         title(sprintf("Satellite Trajectory at time %.2f days", tArray(i) / (3600 * 24) * playbackSpeed));
         drawnow;
-        %pause(dt / playbackSpeed);
         grid on;
     
         if output == 1
@@ -355,9 +354,9 @@ if plotnum4 == 1
             img =  frame2im(frame);
             [img,cmap] = rgb2ind(img,256);
             if i == 1
-                imwrite(img,cmap,'TrajAnimation.gif','gif','LoopCount',Inf,'DelayTime',dt/playbackSpeed);
+                imwrite(img,cmap,'TrajAnimation.gif','gif','LoopCount',Inf,'DelayTime',1/24);
             else
-                imwrite(img,cmap,'TrajAnimation.gif','gif','WriteMode','append','DelayTime',dt/playbackSpeed);
+                imwrite(img,cmap,'TrajAnimation.gif','gif','WriteMode','append','DelayTime',1/24);
             end
         end
     end
